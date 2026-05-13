@@ -1,0 +1,224 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+<Node Id="IModel" Label="SystemZglaszaniaUsterekDbContext" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot" PropertyAccessMode="PropertyAccessMode.Default" ProductVersion="10.0.8" Annotations="BaseTypeDiscoveryConvention:DerivedTypes: System.Collections.Generic.Dictionary`2[System.Type,System.Collections.Generic.List`1[Microsoft.EntityFrameworkCore.Metadata.IConventionEntityType]]
+InversePropertyAttributeConvention:InverseNavigations: System.Collections.Generic.Dictionary`2[System.Type,System.Collections.Generic.SortedSet`1[System.Type]]
+NonNullableConventionState: System.Reflection.NullabilityInfoContext
+Relational:MaxIdentifierLength: 128
+SqlServer:ValueGenerationStrategy: IdentityColumn" Category="Model" Group="Expanded" />
+<Node Id = "CategoryModel" Label="CategoryModel" Name="CategoryModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="Relational:TableName: Categories
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "CommentModel" Label="CommentModel" Name="CommentModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="Relational:TableName: Comments
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "CategoryModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "CategoryModel.Tickets" Label="Tickets (*)" Name="Tickets" Category="Navigation Collection" Type="ICollection&lt;TicketModel&gt;"  Field="" Dependent="TicketModel" Principal="" Inverse="Category" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "CategoryModel.Name" Label="Name (string)" Name="Name" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "PriorityModel" Label="PriorityModel" Name="PriorityModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="Relational:TableName: Priorities
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "CommentModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "CommentModel.Ticket" Label="Ticket (1)" Name="Ticket" Category="Navigation Property" Type="TicketModel"  Field="" Dependent="" Principal="TicketModel" Inverse="Comments" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "CommentModel.User" Label="User (1)" Name="User" Category="Navigation Property" Type="UserModel"  Field="" Dependent="" Principal="UserModel" Inverse="Comments" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "CommentModel.Content" Label="Content (string)" Name="Content" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "CommentModel.CreatedAt" Label="CreatedAt (DateTime)" Name="CreatedAt" Category="Property Required" Type="DateTime" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "CommentModel.TicketId" Label="TicketId (int?)" Name="TicketId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "CommentModel.UserId" Label="UserId (int?)" Name="UserId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "StatusModel" Label="StatusModel" Name="StatusModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="Relational:TableName: Statuses
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "PriorityModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "PriorityModel.Tickets" Label="Tickets (*)" Name="Tickets" Category="Navigation Collection" Type="ICollection&lt;TicketModel&gt;"  Field="" Dependent="TicketModel" Principal="" Inverse="Priority" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "PriorityModel.Name" Label="Name (string)" Name="Name" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketHistoryModel" Label="TicketHistoryModel" Name="TicketHistoryModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="Relational:TableName: TicketHistories
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "StatusModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "StatusModel.Tickets" Label="Tickets (*)" Name="Tickets" Category="Navigation Collection" Type="ICollection&lt;TicketModel&gt;"  Field="" Dependent="TicketModel" Principal="" Inverse="Status" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "StatusModel.Name" Label="Name (string)" Name="Name" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel" Label="TicketModel" Name="TicketModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ComplexPropertyDiscoveryConvention:ComplexCandidates: System.Collections.Generic.Dictionary`2[System.String,System.Reflection.MemberInfo]
+Relational:TableName: Tickets
+RelationshipDiscoveryConvention:AmbiguousNavigations: System.Collections.Immutable.ImmutableSortedDictionary`2[System.Reflection.MemberInfo,System.Type]
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "TicketHistoryModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "TicketHistoryModel.ChangedBy" Label="ChangedBy (1)" Name="ChangedBy" Category="Navigation Property" Type="UserModel"  Field="" Dependent="" Principal="UserModel" Inverse="HistoryChanges" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketHistoryModel.NewStatus" Label="NewStatus (1)" Name="NewStatus" Category="Navigation Property" Type="StatusModel"  Field="" Dependent="" Principal="StatusModel" Inverse="" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketHistoryModel.OldStatus" Label="OldStatus (1)" Name="OldStatus" Category="Navigation Property" Type="StatusModel"  Field="" Dependent="" Principal="StatusModel" Inverse="" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketHistoryModel.Ticket" Label="Ticket (1)" Name="Ticket" Category="Navigation Property" Type="TicketModel"  Field="" Dependent="" Principal="TicketModel" Inverse="History" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketHistoryModel.ChangedAt" Label="ChangedAt (DateTime)" Name="ChangedAt" Category="Property Required" Type="DateTime" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketHistoryModel.ChangedById" Label="ChangedById (int?)" Name="ChangedById" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketHistoryModel.NewStatusId" Label="NewStatusId (int?)" Name="NewStatusId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketHistoryModel.OldStatusId" Label="OldStatusId (int?)" Name="OldStatusId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketHistoryModel.TicketId" Label="TicketId (int?)" Name="TicketId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel" Label="UserModel" Name="UserModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="Relational:TableName: Users
+RelationshipDiscoveryConvention:AmbiguousNavigations: System.Collections.Immutable.ImmutableSortedDictionary`2[System.Reflection.MemberInfo,System.Type]
+RelationshipDiscoveryConvention:NavigationCandidates: Microsoft.EntityFrameworkCore.Utilities.OrderedDictionary`2[System.Reflection.PropertyInfo,System.ValueTuple`2[System.Type,System.Nullable`1[System.Boolean]]]" Category="EntityType" Group="Expanded" />
+<Node Id = "TicketModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "TicketModel.Category" Label="Category (1)" Name="Category" Category="Navigation Property" Type="CategoryModel"  Field="" Dependent="" Principal="CategoryModel" Inverse="Tickets" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.Comments" Label="Comments (*)" Name="Comments" Category="Navigation Collection" Type="ICollection&lt;CommentModel&gt;"  Field="" Dependent="CommentModel" Principal="" Inverse="Ticket" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.History" Label="History (*)" Name="History" Category="Navigation Collection" Type="ICollection&lt;TicketHistoryModel&gt;"  Field="" Dependent="TicketHistoryModel" Principal="" Inverse="Ticket" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.Priority" Label="Priority (1)" Name="Priority" Category="Navigation Property" Type="PriorityModel"  Field="" Dependent="" Principal="PriorityModel" Inverse="Tickets" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.Reporter" Label="Reporter (1)" Name="Reporter" Category="Navigation Property" Type="UserModel"  Field="" Dependent="" Principal="UserModel" Inverse="ReportedTickets" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.Status" Label="Status (1)" Name="Status" Category="Navigation Property" Type="StatusModel"  Field="" Dependent="" Principal="StatusModel" Inverse="Tickets" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.Technician" Label="Technician (1)" Name="Technician" Category="Navigation Property" Type="UserModel"  Field="" Dependent="" Principal="UserModel" Inverse="AssignedTickets" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "TicketModel.CategoryId" Label="CategoryId (int?)" Name="CategoryId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.CreatedAt" Label="CreatedAt (DateTime)" Name="CreatedAt" Category="Property Required" Type="DateTime" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.Description" Label="Description (string)" Name="Description" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.Location" Label="Location (string)" Name="Location" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.PriorityId" Label="PriorityId (int?)" Name="PriorityId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.ReporterId" Label="ReporterId (int?)" Name="ReporterId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.StatusId" Label="StatusId (int?)" Name="StatusId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.TechnicianId" Label="TechnicianId (int?)" Name="TechnicianId" Category="Property Foreign" Type="int?" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="True" IsRequired="False" IsIndexed="True" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.Title" Label="Title (string)" Name="Title" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "TicketModel.UpdatedAt" Label="UpdatedAt (DateTime?)" Name="UpdatedAt" Category="Property Optional" Type="DateTime?" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel" Label="UserModel" Name="UserModel" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="" Category="EntityType" Group="Expanded" />
+<Node Id = "UserModel.Id" Label="Id (int)" Name="Id" Category="Property Primary" Type="int" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="SqlServer:ValueGenerationStrategy: IdentityColumn" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "UserModel.AssignedTickets" Label="AssignedTickets (*)" Name="AssignedTickets" Category="Navigation Collection" Type="ICollection&lt;TicketModel&gt;"  Field="" Dependent="TicketModel" Principal="" Inverse="Technician" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "UserModel.Comments" Label="Comments (*)" Name="Comments" Category="Navigation Collection" Type="ICollection&lt;CommentModel&gt;"  Field="" Dependent="CommentModel" Principal="" Inverse="User" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "UserModel.HistoryChanges" Label="HistoryChanges (*)" Name="HistoryChanges" Category="Navigation Collection" Type="ICollection&lt;TicketHistoryModel&gt;"  Field="" Dependent="TicketHistoryModel" Principal="" Inverse="ChangedBy" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "UserModel.ReportedTickets" Label="ReportedTickets (*)" Name="ReportedTickets" Category="Navigation Collection" Type="ICollection&lt;TicketModel&gt;"  Field="" Dependent="TicketModel" Principal="" Inverse="Reporter" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "UserModel.CreatedAt" Label="CreatedAt (DateTime)" Name="CreatedAt" Category="Property Required" Type="DateTime" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel.Email" Label="Email (string)" Name="Email" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel.FirstName" Label="FirstName (string)" Name="FirstName" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel.LastName" Label="LastName (string)" Name="LastName" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel.PasswordHash" Label="PasswordHash (string)" Name="PasswordHash" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel.Role" Label="Role (Role)" Name="Role" Category="Property Required" Type="Role" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "UserModel.Username" Label="Username (string)" Name="Username" Category="Property Required" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+  </Nodes>
+  <Links>
+<Link Source = "IModel" Target="CategoryModel" Category="Contains" />
+<Link Source = "IModel" Target="CommentModel" Category="Contains" />
+<Link Source = "CategoryModel" Target="CategoryModel.Tickets" Category="Contains" />
+<Link Source = "CategoryModel" Target="CategoryModel.Id" Category="Contains" />
+<Link Source = "CategoryModel" Target="CategoryModel.Name" Category="Contains" />
+<Link Source = "IModel" Target="PriorityModel" Category="Contains" />
+<Link Source = "CommentModel" Target="CommentModel.Ticket" Category="Contains" />
+<Link Source = "CommentModel" Target="CommentModel.User" Category="Contains" />
+<Link Source = "CommentModel" Target="CommentModel.Id" Category="Contains" />
+<Link Source="CommentModel" Target="TicketModel" From="CommentModel.TicketId" To="TicketModel.Id" Name="CommentModel -> TicketModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="CommentModel" Target="UserModel" From="CommentModel.UserId" To="UserModel.Id" Name="CommentModel -> UserModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source = "CommentModel" Target="CommentModel.Content" Category="Contains" />
+<Link Source = "CommentModel" Target="CommentModel.CreatedAt" Category="Contains" />
+<Link Source = "CommentModel" Target="CommentModel.TicketId" Category="Contains" />
+<Link Source = "CommentModel" Target="CommentModel.UserId" Category="Contains" />
+<Link Source = "IModel" Target="StatusModel" Category="Contains" />
+<Link Source = "PriorityModel" Target="PriorityModel.Tickets" Category="Contains" />
+<Link Source = "PriorityModel" Target="PriorityModel.Id" Category="Contains" />
+<Link Source = "PriorityModel" Target="PriorityModel.Name" Category="Contains" />
+<Link Source = "IModel" Target="TicketHistoryModel" Category="Contains" />
+<Link Source = "StatusModel" Target="StatusModel.Tickets" Category="Contains" />
+<Link Source = "StatusModel" Target="StatusModel.Id" Category="Contains" />
+<Link Source = "StatusModel" Target="StatusModel.Name" Category="Contains" />
+<Link Source = "IModel" Target="TicketModel" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.ChangedBy" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.NewStatus" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.OldStatus" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.Ticket" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.Id" Category="Contains" />
+<Link Source="TicketHistoryModel" Target="UserModel" From="TicketHistoryModel.ChangedById" To="UserModel.Id" Name="TicketHistoryModel -> UserModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketHistoryModel" Target="StatusModel" From="TicketHistoryModel.NewStatusId" To="StatusModel.Id" Name="TicketHistoryModel -> StatusModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketHistoryModel" Target="StatusModel" From="TicketHistoryModel.OldStatusId" To="StatusModel.Id" Name="TicketHistoryModel -> StatusModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketHistoryModel" Target="TicketModel" From="TicketHistoryModel.TicketId" To="TicketModel.Id" Name="TicketHistoryModel -> TicketModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.ChangedAt" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.ChangedById" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.NewStatusId" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.OldStatusId" Category="Contains" />
+<Link Source = "TicketHistoryModel" Target="TicketHistoryModel.TicketId" Category="Contains" />
+<Link Source = "IModel" Target="UserModel" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Category" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Comments" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.History" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Priority" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Reporter" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Status" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Technician" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Id" Category="Contains" />
+<Link Source="TicketModel" Target="CategoryModel" From="TicketModel.CategoryId" To="CategoryModel.Id" Name="TicketModel -> CategoryModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketModel" Target="PriorityModel" From="TicketModel.PriorityId" To="PriorityModel.Id" Name="TicketModel -> PriorityModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketModel" Target="UserModel" From="TicketModel.ReporterId" To="UserModel.Id" Name="TicketModel -> UserModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketModel" Target="StatusModel" From="TicketModel.StatusId" To="StatusModel.Id" Name="TicketModel -> StatusModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="TicketModel" Target="UserModel" From="TicketModel.TechnicianId" To="UserModel.Id" Name="TicketModel -> UserModel" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source = "TicketModel" Target="TicketModel.CategoryId" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.CreatedAt" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Description" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Location" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.PriorityId" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.ReporterId" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.StatusId" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.TechnicianId" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.Title" Category="Contains" />
+<Link Source = "TicketModel" Target="TicketModel.UpdatedAt" Category="Contains" />
+<Link Source = "IModel" Target="UserModel" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.AssignedTickets" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.Comments" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.HistoryChanges" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.ReportedTickets" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.Id" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.CreatedAt" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.Email" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.FirstName" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.LastName" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.PasswordHash" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.Role" Category="Contains" />
+<Link Source = "UserModel" Target="UserModel.Username" Category="Contains" />
+  </Links>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="EntityType" ValueLabel="True">
+      <Condition Expression="HasCategory('EntityType')" />
+      <Setter Property="Background" Value="#FFC0C0C0" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Primary" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Primary')" />
+      <Setter Property="Background" Value="#FF008000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Optional" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Optional')" />
+      <Setter Property="Background" Value="#FF808040" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Foreign" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Foreign')" />
+      <Setter Property="Background" Value="#FF8080FF" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Required" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Required')" />
+      <Setter Property="Background" Value="#FFC0A000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Navigation Property" ValueLabel="True">
+      <Condition Expression="HasCategory('Navigation Property')" />
+      <Setter Property="Background" Value="#FF990000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Navigation Collection" ValueLabel="True">
+      <Condition Expression="HasCategory('Navigation Collection')" />
+      <Setter Property="Background" Value="#FFFF3232" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Model" ValueLabel="True">
+      <Condition Expression="HasCategory('Model')" />
+      <Setter Property="Background" Value="#FFFFFFFF" />
+    </Style>
+  </Styles>
+  <Properties>
+    <Property Id="Name" Group="Model Properties" DataType="System.String" />
+    <Property Id="Field"  Description="Backing field" Group="Model Properties" DataType="System.String" />
+    <Property Id="Type"  Description="CLR data type" Group="Model Properties" DataType="System.String" />
+    <Property Id="To" Description="Source property" Group="Model Properties" DataType="System.String" />
+    <Property Id="From" Description="Target property" Group="Model Properties" DataType="System.String" />
+    <Property Id="Dependent" Description="Dependent entity" Group="Model Properties" DataType="System.String" />
+    <Property Id="Inverse" Description="Inverse entity" Group="Model Properties" DataType="System.String" />
+    <Property Id="Principal" Description="Principal entity" Group="Model Properties" DataType="System.String" />    
+    <Property Id="Annotations" Description="Annotations" Group="Model Properties" DataType="System.String" />
+    <Property Id="BaseClass"  Description="Base class" Group="Model Properties" DataType="System.String" />
+    <Property Id="ChangeTrackingStrategy" Description="Change tracking strategy" Group="Model Properties" DataType="System.String" />
+    <Property Id="IsUnique" Group="Model Properties" DataType="System.Boolean" />
+    <Property Id="IsAbstract" Group="Model Properties" DataType="System.Boolean" />
+    <Property Id="ProductVersion" Label="Product Version" Description="EF Core product version" Group="Model Properties" DataType="System.String" />
+    <Property Id="IsIndexed" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsRequired" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsPrimaryKey" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsForeignKey" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsShadow" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsAlternateKey" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsConcurrencyToken" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsIndexed" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsUnicode" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="ValueGenerated" Group="Property Flags" DataType="System.String" />
+    <Property Id="BeforeSaveBehavior" Group="Property Flags" DataType="System.String" />
+    <Property Id="AfterSaveBehavior" Group="Property Flags" DataType="System.String" />
+    <Property Id="PropertyAccessMode" Group="Property Flags" DataType="System.String" />
+  </Properties>
+</DirectedGraph>
