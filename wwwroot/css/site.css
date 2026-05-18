@@ -1,5 +1,28 @@
+/* CSS Variables */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-color: #667eea;
+  --primary-dark: #764ba2;
+  --text-dark: #333;
+  --text-muted: #666;
+  --text-light: #999;
+  --bg-light: #f8f9fa;
+  --bg-lighter: #f0f0f0;
+  --border-color: #e9ecef;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 15px rgba(102, 126, 234, 0.3);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 15px;
+  --transition: all 0.3s ease;
+}
+
+/* Global Styles */
 html {
   font-size: 14px;
+  position: relative;
+  min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -8,24 +31,79 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+body {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Forms */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+/* Navbar */
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+  font-weight: 700;
+  color: var(--text-dark) !important;
+}
+
+.navbar-brand:hover {
+  color: var(--primary-color) !important;
+}
+
+/* Footer */
+.border-top {
+  border-top: 1px solid var(--border-color);
+}
+
+.border-bottom {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.box-shadow {
+  box-shadow: var(--shadow-sm);
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+  background-color: #f8f9fa;
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
 }
