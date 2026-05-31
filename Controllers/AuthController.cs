@@ -52,7 +52,8 @@ namespace SystemZglaszaniaUsterek.Controllers
 
                     var authProperties = new AuthenticationProperties
                     {
-                        IsPersistent = true
+                        IsPersistent = false,
+                        AllowRefresh = true
                     };
 
                     await HttpContext.SignInAsync(
@@ -82,6 +83,18 @@ namespace SystemZglaszaniaUsterek.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Ping()
+        {
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                return Unauthorized();
+            }
+
+            return Json(new { ok = true, serverTimeUtc = DateTime.UtcNow });
         }
     }
 }

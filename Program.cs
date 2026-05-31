@@ -19,8 +19,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Auth/Login"; // Redirect to login or create a specific access denied page
+        options.AccessDeniedPath = "/Auth/Login";
+
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(7);
+        options.SlidingExpiration = true;
+
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
+
+builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
 // Cloudinary configuration
 builder.Services.Configure<CloudinaryOptions>(
