@@ -43,7 +43,8 @@ namespace SystemZglaszaniaUsterek.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsClosed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,7 +63,9 @@ namespace SystemZglaszaniaUsterek.Migrations
                     Role = table.Column<int>(type: "int", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,7 +83,7 @@ namespace SystemZglaszaniaUsterek.Migrations
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PriorityId = table.Column<int>(type: "int", nullable: true),
                     StatusId = table.Column<int>(type: "int", nullable: true),
-                    CategoryId = table.Column<int>(type: "int", nullable: true),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
                     ReporterId = table.Column<int>(type: "int", nullable: true),
                     TechnicianId = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -119,6 +122,31 @@ namespace SystemZglaszaniaUsterek.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TicketId = table.Column<int>(type: "int", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OriginalFileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attachments_Tickets_TicketId",
+                        column: x => x.TicketId,
+                        principalTable: "Tickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -191,6 +219,11 @@ namespace SystemZglaszaniaUsterek.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attachments_TicketId",
+                table: "Attachments",
+                column: "TicketId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Comments_TicketId",
                 table: "Comments",
                 column: "TicketId");
@@ -249,6 +282,9 @@ namespace SystemZglaszaniaUsterek.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Attachments");
+
             migrationBuilder.DropTable(
                 name: "Comments");
 

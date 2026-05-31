@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SystemZglaszaniaUsterek.Models.Entities;
@@ -59,6 +60,34 @@ namespace SystemZglaszaniaUsterek.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var currentIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(currentIdClaim, out var currentId) && currentId == user.Id)
+            {
+                TempData["UserActionError"] = "Nie możesz usunąć własnego konta.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!user.IsDeleted)
+            {
+                user.IsDeleted = true;
+                user.DeletedAt = DateTime.UtcNow;
+                _context.SaveChanges();
+            }
+
+            TempData["UserActionMessage"] = $"Konto użytkownika '{user.Username}' zostało dezaktywowane.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }
