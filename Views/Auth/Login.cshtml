@@ -12,6 +12,11 @@
         </div>
 
         <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="login-form">
+            @if (TempData["LoginInfo"] is string infoMsg)
+            {
+                <div class="alert alert-success" role="alert">@infoMsg</div>
+            }
+
             <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong>Błąd logowania!</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -30,7 +35,7 @@
             </div>
 
             <div class="text-end mb-4">
-                <a href="#" class="forgot-password-link">Zapomniałeś hasła?</a>
+                <a asp-action="ForgotPassword" class="forgot-password-link">Zapomniałeś hasła?</a>
             </div>
 
             <div class="d-grid gap-2 mb-4">

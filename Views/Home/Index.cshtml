@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SystemZglaszaniaUsterek.Models.ViewModels.HomeIndexViewModel
+@{
     ViewData["Title"] = "System Zgłaszania Usterek";
 }
 
@@ -27,7 +28,7 @@
             <!-- Current Issues Card -->
             <div class="col-md-6 col-lg-3">
                 <div class="stat-card">
-                    <div class="stat-number" id="currentIssues">0</div>
+                    <div class="stat-number" id="currentIssues">@Model.CurrentIssues</div>
                     <div class="stat-label">Aktualnie Otwarte Usterki</div>
                     <div class="stat-description">Usterki oczekujące na rozwiązanie</div>
                 </div>
@@ -36,7 +37,7 @@
             <!-- Total Resolved Card -->
             <div class="col-md-6 col-lg-3">
                 <div class="stat-card">
-                    <div class="stat-number" id="totalResolved">0</div>
+                    <div class="stat-number" id="totalResolved">@Model.TotalResolved</div>
                     <div class="stat-label">Rozwiązane Ogółem</div>
                     <div class="stat-description">Wszystkie zamknięte usterki</div>
                 </div>
@@ -45,7 +46,7 @@
             <!-- This Week Resolved Card -->
             <div class="col-md-6 col-lg-3">
                 <div class="stat-card">
-                    <div class="stat-number" id="weekResolved">0</div>
+                    <div class="stat-number" id="weekResolved">@Model.WeekResolved</div>
                     <div class="stat-label">Rozwiązane w Tym Tygodniu</div>
                     <div class="stat-description">W ostatnich 7 dniach</div>
                 </div>
@@ -54,7 +55,7 @@
             <!-- Average Resolution Time Card -->
             <div class="col-md-6 col-lg-3">
                 <div class="stat-card">
-                    <div class="stat-number" id="avgTime">0h</div>
+                    <div class="stat-number" id="avgTime">@Model.AvgResolutionTimeText</div>
                     <div class="stat-label">Średni Czas Rozwiązania</div>
                     <div class="stat-description">Średnia czasu od zgłoszenia do zamknięcia</div>
                 </div>
@@ -68,14 +69,37 @@
     <div class="container">
         <h2>Ogłoszenia o Usterkach Systemowych</h2>
         <div class="announcements-container" id="announcements">
-            <div class="announcement-item">
-                <div class="announcement-title">📢 Brak aktualnych ogłoszeń</div>
-                <div class="announcement-date">System gotów do pracy</div>
-                <div class="announcement-text">
-                    Aktualnie nie ma żadnych ogłoszeń o znanych usterkach systemowych. 
-                    System działa normalnie. Jeśli napotkasz jakikolwiek problem, zgłoś go po zalogowaniu.
+            @if (Model.Announcements != null && Model.Announcements.Count > 0)
+            {
+                foreach (var a in Model.Announcements)
+                {
+                    var (icon, badgeClass, badgeLabel) = a.Severity switch
+                    {
+                        SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Critical => ("🚨", "bg-danger", "Krytyczne"),
+                        SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Warning => ("⚠️", "bg-warning text-dark", "Ostrzeżenie"),
+                        _ => ("📢", "bg-info text-dark", "Info")
+                    };
+                    <div class="announcement-item">
+                        <div class="announcement-title">
+                            @icon @a.Title
+                            <span class="badge @badgeClass ms-2">@badgeLabel</span>
+                        </div>
+                        <div class="announcement-date">@a.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                        <div class="announcement-text">@a.Content</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="announcement-item">
+                    <div class="announcement-title">📢 Brak aktualnych ogłoszeń</div>
+                    <div class="announcement-date">System gotów do pracy</div>
+                    <div class="announcement-text">
+                        Aktualnie nie ma żadnych ogłoszeń o znanych usterkach systemowych.
+                        System działa normalnie. Jeśli napotkasz jakikolwiek problem, zgłoś go po zalogowaniu.
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 </section>

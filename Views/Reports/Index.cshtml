@@ -1,0 +1,112 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.ReportsRepairViewModel
+@{
+    ViewData["Title"] = "Raporty napraw";
+}
+
+<h1 class="mb-3">Raport napraw</h1>
+
+<form method="get" class="card card-body mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <label class="form-label">Od</label>
+            <input type="date" name="DateFrom" value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Do</label>
+            <input type="date" name="DateTo" value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Technik</label>
+            <select name="TechnicianId" class="form-select">
+                <option value="">-- dowolny --</option>
+                @foreach (var t in Model.Technicians)
+                {
+                    <option value="@t.Id" selected="@(Model.Filter.TechnicianId == t.Id)">@t.Username</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Kategoria</label>
+            <select name="CategoryId" class="form-select">
+                <option value="">-- dowolna --</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id" selected="@(Model.Filter.CategoryId == c.Id)">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Generuj</button>
+        </div>
+    </div>
+    <div class="mt-2">
+        <a class="btn btn-outline-success" asp-action="ExportCsv"
+           asp-route-DateFrom="@Model.Filter.DateFrom?.ToString("yyyy-MM-dd")"
+           asp-route-DateTo="@Model.Filter.DateTo?.ToString("yyyy-MM-dd")"
+           asp-route-TechnicianId="@Model.Filter.TechnicianId"
+           asp-route-CategoryId="@Model.Filter.CategoryId">
+            Pobierz CSV
+        </a>
+    </div>
+</form>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card card-body"><div class="text-muted small">Wszystkie</div><div class="fs-3 fw-bold">@Model.Total</div></div></div>
+    <div class="col-md-3"><div class="card card-body"><div class="text-muted small">Otwarte</div><div class="fs-3 fw-bold">@Model.Open</div></div></div>
+    <div class="col-md-3"><div class="card card-body"><div class="text-muted small">Zamknięte</div><div class="fs-3 fw-bold">@Model.Closed</div></div></div>
+    <div class="col-md-3"><div class="card card-body"><div class="text-muted small">Średni czas (h)</div><div class="fs-3 fw-bold">@Model.AvgResolutionHours</div></div></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <h5>Wg statusu</h5>
+        <table class="table table-sm">
+            <thead><tr><th>Status</th><th class="text-end">Liczba</th></tr></thead>
+            <tbody>@foreach (var r in Model.ByStatus){<tr><td>@r.Label</td><td class="text-end">@r.Count</td></tr>}</tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h5>Wg priorytetu</h5>
+        <table class="table table-sm">
+            <thead><tr><th>Priorytet</th><th class="text-end">Liczba</th></tr></thead>
+            <tbody>@foreach (var r in Model.ByPriority){<tr><td>@r.Label</td><td class="text-end">@r.Count</td></tr>}</tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h5>Wg kategorii</h5>
+        <table class="table table-sm">
+            <thead><tr><th>Kategoria</th><th class="text-end">Liczba</th></tr></thead>
+            <tbody>@foreach (var r in Model.ByCategory){<tr><td>@r.Label</td><td class="text-end">@r.Count</td></tr>}</tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h5>Wg technika</h5>
+        <table class="table table-sm">
+            <thead><tr><th>Technik</th><th class="text-end">Liczba</th></tr></thead>
+            <tbody>@foreach (var r in Model.ByTechnician){<tr><td>@r.Label</td><td class="text-end">@r.Count</td></tr>}</tbody>
+        </table>
+    </div>
+</div>
+
+<h5 class="mt-4">Lista zgłoszeń (max 500)</h5>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr><th>#</th><th>Tytuł</th><th>Status</th><th>Priorytet</th><th>Kategoria</th><th>Technik</th><th>Utworzono</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model.Items)
+            {
+                <tr>
+                    <td><a asp-controller="Tickets" asp-action="Details" asp-route-id="@t.Id">@t.Id</a></td>
+                    <td>@t.Title</td>
+                    <td>@t.StatusName</td>
+                    <td>@(t.PriorityName ?? "-")</td>
+                    <td>@t.CategoryName</td>
+                    <td>@(t.TechnicianUsername ?? "-")</td>
+                    <td>@t.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

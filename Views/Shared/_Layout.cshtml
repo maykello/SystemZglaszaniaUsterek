@@ -24,21 +24,47 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Tickets" asp-action="Index">Zgłoszenia</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Tickets" asp-action="Create">Nowe zgłoszenie</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Technician") || User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Reports" asp-action="Index">Raporty</a>
+                            </li>
+                        }
                         @if (User.IsInRole("Administrator"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Użytkownicy</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Categories" asp-action="Index">Kategorie</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Priorities" asp-action="Index">Priorytety</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Announcements" asp-action="Index">Ogłoszenia</a>
+                            </li>
                         }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item d-flex align-items-center me-3">
-                                <span class="text-dark">Witaj, <strong>@User.Identity.Name</strong>!</span>
+                                <a class="text-dark text-decoration-none" asp-controller="Users" asp-action="Profile">
+                                    Witaj, <strong>@User.Identity.Name</strong>!
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Auth" asp-action="Logout" method="post" class="form-inline">
@@ -68,6 +94,14 @@
             &copy; 2026 - SystemZglaszaniaUsterek - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        @await Html.PartialAsync("_SessionTimeout")
+    }
+    @if (User.IsInRole("Technician") || User.IsInRole("Administrator"))
+    {
+        @await Html.PartialAsync("_NewTicketNotifications")
+    }
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,0 +1,84 @@
+@model IEnumerable<SystemZglaszaniaUsterek.Models.Entities.AnnouncementModel>
+@{
+    ViewData["Title"] = "Ogłoszenia";
+}
+
+<h1 class="mb-3">Ogłoszenia o usterkach systemowych</h1>
+
+@if (TempData["AnnouncementsMessage"] is string okMsg)
+{
+    <div class="alert alert-success">@okMsg</div>
+}
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">+ Nowe ogłoszenie</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">Brak ogłoszeń. Kliknij "Nowe ogłoszenie", aby coś dodać.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tytuł</th>
+                <th>Waga</th>
+                <th>Aktywne</th>
+                <th>Utworzono</th>
+                <th>Autor</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model)
+            {
+                <tr>
+                    <td>@a.Id</td>
+                    <td>@a.Title</td>
+                    <td>
+                        @switch (a.Severity)
+                        {
+                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Info:
+                                <span class="badge bg-info text-dark">Info</span>
+                                break;
+                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Warning:
+                                <span class="badge bg-warning text-dark">Ostrzeżenie</span>
+                                break;
+                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Critical:
+                                <span class="badge bg-danger">Krytyczne</span>
+                                break;
+                        }
+                    </td>
+                    <td>
+                        @if (a.IsActive)
+                        {
+                            <span class="badge bg-success">tak</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">nie</span>
+                        }
+                    </td>
+                    <td>@a.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@(a.CreatedBy?.Username ?? "-")</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Edytuj</a>
+                        <form asp-action="ToggleActive" asp-route-id="@a.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                @(a.IsActive ? "Ukryj" : "Aktywuj")
+                            </button>
+                        </form>
+                        <form asp-action="Delete" asp-route-id="@a.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć ogłoszenie? Tej operacji nie można cofnąć.');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
