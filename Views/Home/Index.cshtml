@@ -1,8 +1,103 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model SystemZglaszaniaUsterek.Models.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "System Zgłaszania Usterek";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <h1>System Zgłaszania Usterek</h1>
+    <p>Zgłoś problemy i śledź ich status w jednym miejscu</p>
+    <div class="hero-buttons">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a href="/Tickets/Create" class="btn btn-primary-hero">Zgłoś Usterkę</a>
+        }
+        else
+        {
+            <a href="/Auth/Login" class="btn btn-primary-hero">Zaloguj się i Zgłoś Usterkę</a>
+        }
+        <a href="#stats" class="btn btn-secondary-hero">Wyświetl Statystyki</a>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section id="stats" class="stats-section">
+    <div class="container">
+        <h2>Statystyki</h2>
+        <div class="row g-4">
+            <!-- Current Issues Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="currentIssues">@Model.CurrentIssues</div>
+                    <div class="stat-label">Aktualnie Otwarte Usterki</div>
+                    <div class="stat-description">Usterki oczekujące na rozwiązanie</div>
+                </div>
+            </div>
+
+            <!-- Total Resolved Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalResolved">@Model.TotalResolved</div>
+                    <div class="stat-label">Rozwiązane Ogółem</div>
+                    <div class="stat-description">Wszystkie zamknięte usterki</div>
+                </div>
+            </div>
+
+            <!-- This Week Resolved Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="weekResolved">@Model.WeekResolved</div>
+                    <div class="stat-label">Rozwiązane w Tym Tygodniu</div>
+                    <div class="stat-description">W ostatnich 7 dniach</div>
+                </div>
+            </div>
+
+            <!-- Average Resolution Time Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="avgTime">@Model.AvgResolutionTimeText</div>
+                    <div class="stat-label">Średni Czas Rozwiązania</div>
+                    <div class="stat-description">Średnia czasu od zgłoszenia do zamknięcia</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Announcements Section -->
+<section class="announcements-section">
+    <div class="container">
+        <h2>Ogłoszenia o Usterkach Systemowych</h2>
+        <div class="announcements-container" id="announcements">
+            <div class="announcement-item">
+                <div class="announcement-title">📢 Brak aktualnych ogłoszeń</div>
+                <div class="announcement-date">System gotów do pracy</div>
+                <div class="announcement-text">
+                    Aktualnie nie ma żadnych ogłoszeń o znanych usterkach systemowych. 
+                    System działa normalnie. Jeśli napotkasz jakikolwiek problem, zgłoś go po zalogowaniu.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Coś Się Zepsuło?</h2>
+        <p>Nie czekaj! Zgłoś problem i pomóż nam go naprawić.</p>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a href="/Tickets/Create" class="btn cta-btn">Zgłoś Usterkę Teraz</a>
+        }
+        else
+        {
+            <a href="/Auth/Login" class="btn cta-btn">Zaloguj się Aby Zgłosić Usterkę</a>
+        }
+    </div>
+</section>
+
+<script>
+    // Placeholder script
+    document.addEventListener('DOMContentLoaded', function () {});
+</script>
