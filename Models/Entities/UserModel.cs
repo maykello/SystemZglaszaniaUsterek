@@ -25,7 +25,11 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         public string? LastName { get; set; }
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeletedAt { get; set; }
+
         public ICollection<TicketModel> ReportedTickets { get; set; } = new List<TicketModel>();
         public ICollection<TicketModel> AssignedTickets { get; set; } = new List<TicketModel>();
         public ICollection<CommentModel> Comments { get; set; } = new List<CommentModel>();

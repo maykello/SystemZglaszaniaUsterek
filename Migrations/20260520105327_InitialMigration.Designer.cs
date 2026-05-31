@@ -12,7 +12,7 @@ using SystemZglaszaniaUsterek.Models.Entities;
 namespace SystemZglaszaniaUsterek.Migrations
 {
     [DbContext(typeof(SystemZglaszaniaUsterekDbContext))]
-    [Migration("20260512221809_InitialMigration")]
+    [Migration("20260520105327_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -24,6 +24,46 @@ namespace SystemZglaszaniaUsterek.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AttachmentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("Attachments");
+                });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CategoryModel", b =>
                 {
@@ -97,6 +137,9 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -150,7 +193,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -208,11 +251,17 @@ namespace SystemZglaszaniaUsterek.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -231,6 +280,17 @@ namespace SystemZglaszaniaUsterek.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AttachmentModel", b =>
+                {
+                    b.HasOne("SystemZglaszaniaUsterek.Models.Entities.TicketModel", "Ticket")
+                        .WithMany("Attachments")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CommentModel", b =>
@@ -286,7 +346,8 @@ namespace SystemZglaszaniaUsterek.Migrations
                     b.HasOne("SystemZglaszaniaUsterek.Models.Entities.CategoryModel", "Category")
                         .WithMany("Tickets")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("SystemZglaszaniaUsterek.Models.Entities.PriorityModel", "Priority")
                         .WithMany("Tickets")
@@ -336,6 +397,8 @@ namespace SystemZglaszaniaUsterek.Migrations
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.TicketModel", b =>
                 {
+                    b.Navigation("Attachments");
+
                     b.Navigation("Comments");
 
                     b.Navigation("History");

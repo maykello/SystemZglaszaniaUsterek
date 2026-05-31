@@ -33,6 +33,12 @@ namespace SystemZglaszaniaUsterek.Controllers
             {
                 var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);
 
+                if (user != null && user.IsDeleted)
+                {
+                    ModelState.AddModelError(string.Empty, "Konto zostało dezaktywowane. Skontaktuj się z administratorem.");
+                    return View(model);
+                }
+
                 if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
                     var claims = new List<Claim>
