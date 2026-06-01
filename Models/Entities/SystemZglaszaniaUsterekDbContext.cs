@@ -18,6 +18,7 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         public DbSet<PriorityModel> Priorities { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
         public DbSet<AttachmentModel> Attachments { get; set; }
+        public DbSet<AnnouncementModel> Announcements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

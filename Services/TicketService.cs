@@ -1,8 +1,10 @@
+using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SystemZglaszaniaUsterek.Models.Entities;
+using SystemZglaszaniaUsterek.Models.Enums;
 using SystemZglaszaniaUsterek.Models.Options;
 using SystemZglaszaniaUsterek.Models.ViewModels;
-using Microsoft.Extensions.Options;
 
 namespace SystemZglaszaniaUsterek.Services
 {
@@ -13,10 +15,32 @@ namespace SystemZglaszaniaUsterek.Services
         public IReadOnlyList<string> Errors { get; init; } = Array.Empty<string>();
     }
 
+    public class OperationResult
+    {
+        public bool Success { get; init; }
+        public IReadOnlyList<string> Errors { get; init; } = Array.Empty<string>();
+
+        public static OperationResult Ok() => new() { Success = true };
+        public static OperationResult Fail(params string[] errors) => new() { Success = false, Errors = errors };
+    }
+
     public interface ITicketService
     {
         Task<CreateTicketResult> CreateAsync(TicketCreateViewModel model, int reporterUserId, CancellationToken ct = default);
         Task<List<CategoryModel>> GetCategoriesAsync(CancellationToken ct = default);
+        Task<List<PriorityModel>> GetPrioritiesAsync(CancellationToken ct = default);
+        Task<List<StatusModel>> GetStatusesAsync(CancellationToken ct = default);
+        Task<List<UserModel>> GetTechniciansAsync(CancellationToken ct = default);
+
+        Task<TicketListResultViewModel> ListAsync(TicketFilterViewModel filter, int currentUserId, Role currentRole, CancellationToken ct = default);
+        Task<TicketDetailsViewModel?> GetDetailsAsync(int id, int currentUserId, Role currentRole, CancellationToken ct = default);
+
+        Task<OperationResult> ChangeStatusAsync(int ticketId, int newStatusId, int actorUserId, Role actorRole, CancellationToken ct = default);
+        Task<OperationResult> AssignTechnicianAsync(int ticketId, int? technicianId, int actorUserId, Role actorRole, CancellationToken ct = default);
+        Task<OperationResult> ChangePriorityAsync(int ticketId, int priorityId, int actorUserId, Role actorRole, CancellationToken ct = default);
+        Task<OperationResult> AddCommentAsync(int ticketId, string content, int authorUserId, Role authorRole, CancellationToken ct = default);
+
+        Task<List<TicketNotificationViewModel>> GetNewTicketsSinceAsync(DateTime sinceUtc, CancellationToken ct = default);
     }
 
     public class TicketService : ITicketService
@@ -44,9 +68,19 @@ namespace SystemZglaszaniaUsterek.Services
         }
 
         public Task<List<CategoryModel>> GetCategoriesAsync(CancellationToken ct = default)
-        {
-            return _db.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(ct);
-        }
+            => _db.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(ct);
+
+        public Task<List<PriorityModel>> GetPrioritiesAsync(CancellationToken ct = default)
+            => _db.Priorities.AsNoTracking().OrderBy(p => p.Id).ToListAsync(ct);
+
+        public Task<List<StatusModel>> GetStatusesAsync(CancellationToken ct = default)
+            => _db.Statuses.AsNoTracking().OrderBy(s => s.Id).ToListAsync(ct);
+
+        public Task<List<UserModel>> GetTechniciansAsync(CancellationToken ct = default)
+            => _db.Users.AsNoTracking()
+                .Where(u => !u.IsDeleted && (u.Role == Role.Technician || u.Role == Role.Administrator))
+                .OrderBy(u => u.Username)
+                .ToListAsync(ct);
 
         public async Task<CreateTicketResult> CreateAsync(TicketCreateViewModel model, int reporterUserId, CancellationToken ct = default)
         {
@@ -105,7 +139,7 @@ namespace SystemZglaszaniaUsterek.Services
                         var uploadResult = await _cloudinary.UploadAsync(file, folder, ct);
                         uploadedPublicIds.Add(uploadResult.PublicId);
 
-                        var attachment = new AttachmentModel
+                        _db.Attachments.Add(new AttachmentModel
                         {
                             TicketId = ticket.Id,
                             Ticket = ticket,
@@ -115,21 +149,18 @@ namespace SystemZglaszaniaUsterek.Services
                             ContentType = file.ContentType ?? "application/octet-stream",
                             SizeBytes = file.Length,
                             UploadedAt = DateTime.UtcNow
-                        };
-
-                        _db.Attachments.Add(attachment);
+                        });
                     }
                 }
 
-                var history = new TicketHistoryModel
+                _db.TicketHistories.Add(new TicketHistoryModel
                 {
                     Ticket = ticket,
                     OldStatus = null,
                     NewStatus = defaultStatus,
                     ChangedBy = reporter,
                     ChangedAt = DateTime.UtcNow
-                };
-                _db.TicketHistories.Add(history);
+                });
 
                 await _db.SaveChangesAsync(ct);
                 return new CreateTicketResult { Success = true, TicketId = ticket.Id };
@@ -140,11 +171,7 @@ namespace SystemZglaszaniaUsterek.Services
 
                 foreach (var publicId in uploadedPublicIds)
                 {
-                    var ok = await _cloudinary.DeleteAsync(publicId, CancellationToken.None);
-                    if (!ok)
-                    {
-                        _logger.LogWarning("Cloudinary cleanup failed for orphaned upload {PublicId}", publicId);
-                    }
+                    await _cloudinary.DeleteAsync(publicId, CancellationToken.None);
                 }
                 try
                 {
@@ -166,6 +193,313 @@ namespace SystemZglaszaniaUsterek.Services
                     Success = false,
                     Errors = new[] { "Nie udało się zapisać zgłoszenia. Spróbuj ponownie za chwilę." }
                 };
+            }
+        }
+
+        public async Task<TicketListResultViewModel> ListAsync(TicketFilterViewModel filter, int currentUserId, Role currentRole, CancellationToken ct = default)
+        {
+            try
+            {
+                var query = BuildListQuery(filter, currentUserId, currentRole, out var effectiveScope);
+
+                var totalCount = await query.CountAsync(ct);
+                var page = filter.Page < 1 ? 1 : filter.Page;
+                var pageSize = filter.PageSize <= 0 ? 20 : Math.Min(filter.PageSize, 100);
+
+                var ordered = currentRole == Role.Administrator
+                    ? query.OrderByDescending(t => t.Technician == null || t.Priority == null)
+                           .ThenByDescending(t => t.CreatedAt)
+                    : query.OrderByDescending(t => t.CreatedAt);
+
+                var items = await ordered
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ProjectToType<TicketListItemViewModel>()
+                    .ToListAsync(ct);
+
+                return new TicketListResultViewModel
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize,
+                    Filter = new TicketFilterViewModel
+                    {
+                        Scope = effectiveScope,
+                        StatusId = filter.StatusId,
+                        PriorityId = filter.PriorityId,
+                        CategoryId = filter.CategoryId,
+                        TechnicianId = filter.TechnicianId,
+                        ReporterId = filter.ReporterId,
+                        DateFrom = filter.DateFrom,
+                        DateTo = filter.DateTo,
+                        Search = filter.Search,
+                        Page = page,
+                        PageSize = pageSize
+                    },
+                    Statuses = await GetStatusesAsync(ct),
+                    Priorities = await GetPrioritiesAsync(ct),
+                    Categories = await GetCategoriesAsync(ct),
+                    Technicians = currentRole == Role.Administrator ? await GetTechniciansAsync(ct) : new List<UserModel>()
+                };
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return new TicketListResultViewModel { Filter = filter };
+            }
+        }
+
+        private IQueryable<TicketModel> BuildListQuery(TicketFilterViewModel filter, int currentUserId, Role currentRole, out TicketScope effectiveScope)
+        {
+            effectiveScope = currentRole == Role.User ? TicketScope.Mine : filter.Scope;
+
+            IQueryable<TicketModel> query = _db.Tickets.AsNoTracking()
+                .Include(t => t.Status)
+                .Include(t => t.Priority)
+                .Include(t => t.Category)
+                .Include(t => t.Reporter)
+                .Include(t => t.Technician);
+
+            query = effectiveScope switch
+            {
+                TicketScope.Mine => query.Where(t => t.Reporter != null && t.Reporter.Id == currentUserId),
+                TicketScope.Assigned when currentRole != Role.User => query.Where(t => t.Technician != null && t.Technician.Id == currentUserId),
+                TicketScope.Assigned => query.Where(_ => false),
+                _ => query
+            };
+
+            if (filter.StatusId.HasValue)
+                query = query.Where(t => t.Status != null && t.Status.Id == filter.StatusId.Value);
+            if (filter.PriorityId.HasValue)
+                query = query.Where(t => t.Priority != null && t.Priority.Id == filter.PriorityId.Value);
+            if (filter.CategoryId.HasValue)
+                query = query.Where(t => t.CategoryId == filter.CategoryId.Value);
+            if (filter.TechnicianId.HasValue)
+                query = query.Where(t => t.Technician != null && t.Technician.Id == filter.TechnicianId.Value);
+            if (filter.ReporterId.HasValue && currentRole == Role.Administrator)
+                query = query.Where(t => t.Reporter != null && t.Reporter.Id == filter.ReporterId.Value);
+            if (filter.DateFrom.HasValue)
+            {
+                var from = DateTime.SpecifyKind(filter.DateFrom.Value.Date, DateTimeKind.Utc);
+                query = query.Where(t => t.CreatedAt >= from);
+            }
+            if (filter.DateTo.HasValue)
+            {
+                var to = DateTime.SpecifyKind(filter.DateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
+                query = query.Where(t => t.CreatedAt < to);
+            }
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+            {
+                var s = filter.Search.Trim();
+                query = query.Where(t => EF.Functions.Like(t.Title, $"%{s}%") || EF.Functions.Like(t.Description, $"%{s}%"));
+            }
+
+            return query;
+        }
+
+        public async Task<TicketDetailsViewModel?> GetDetailsAsync(int id, int currentUserId, Role currentRole, CancellationToken ct = default)
+        {
+            try
+            {
+                var ticket = await _db.Tickets.AsNoTracking()
+                    .Include(t => t.Status)
+                    .Include(t => t.Priority)
+                    .Include(t => t.Category)
+                    .Include(t => t.Reporter)
+                    .Include(t => t.Technician)
+                    .Include(t => t.Attachments)
+                    .Include(t => t.Comments).ThenInclude(c => c.User)
+                    .Include(t => t.History).ThenInclude(h => h.OldStatus)
+                    .Include(t => t.History).ThenInclude(h => h.NewStatus)
+                    .Include(t => t.History).ThenInclude(h => h.ChangedBy)
+                    .FirstOrDefaultAsync(t => t.Id == id, ct);
+
+                if (ticket == null)
+                {
+                    return null;
+                }
+
+                if (currentRole == Role.User && (ticket.Reporter == null || ticket.Reporter.Id != currentUserId))
+                {
+                    return null;
+                }
+
+                var dto = ticket.Adapt<TicketDetailsViewModel>();
+                dto.Attachments = dto.Attachments.OrderBy(a => a.UploadedAt).ToList();
+                dto.Comments = dto.Comments.OrderBy(c => c.CreatedAt).ToList();
+                dto.History = dto.History.OrderBy(h => h.ChangedAt).ToList();
+                var canChangeStatus = currentRole == Role.Administrator
+                                      || (currentRole == Role.Technician && ticket.Technician?.Id == currentUserId);
+                var canAssignAdmin = currentRole == Role.Administrator;
+                var canSelfAssign = currentRole == Role.Technician
+                                    && (ticket.Technician == null || ticket.Technician.Id == currentUserId);
+                var isClosed = ticket.Status?.IsClosed ?? false;
+
+                dto.CanChangeStatus = canChangeStatus;
+                dto.CanAssignTechnician = canAssignAdmin;
+                dto.CanSelfAssign = canSelfAssign;
+                dto.CanComment = !isClosed
+                                 && (currentRole == Role.Administrator
+                                     || currentRole == Role.Technician
+                                     || ticket.Reporter?.Id == currentUserId);
+                dto.CanEdit = canAssignAdmin;
+
+                dto.AvailableStatuses = canChangeStatus ? await GetStatusesAsync(ct) : new List<StatusModel>();
+                dto.AvailableTechnicians = canAssignAdmin ? await GetTechniciansAsync(ct) : new List<UserModel>();
+                dto.AvailablePriorities = canChangeStatus ? await GetPrioritiesAsync(ct) : new List<PriorityModel>();
+
+                return dto;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return null;
+            }
+        }
+
+        public async Task<OperationResult> ChangeStatusAsync(int ticketId, int newStatusId, int actorUserId, Role actorRole, CancellationToken ct = default)
+        {
+            var ticket = await _db.Tickets
+                .Include(t => t.Status)
+                .Include(t => t.Technician)
+                .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
+            if (ticket == null) return OperationResult.Fail("Zgłoszenie nie istnieje.");
+
+            if (actorRole == Role.User)
+                return OperationResult.Fail("Brak uprawnień do zmiany statusu zgłoszenia.");
+            if (actorRole == Role.Technician && ticket.Technician?.Id != actorUserId)
+                return OperationResult.Fail("Możesz zmieniać status tylko przydzielonych do Ciebie zgłoszeń.");
+
+            var newStatus = await _db.Statuses.FirstOrDefaultAsync(s => s.Id == newStatusId, ct);
+            if (newStatus == null) return OperationResult.Fail("Wybrany status nie istnieje.");
+            if (ticket.Status?.Id == newStatus.Id) return OperationResult.Ok();
+
+            var oldStatus = ticket.Status;
+            ticket.Status = newStatus;
+            ticket.UpdatedAt = DateTime.UtcNow;
+
+            var actor = await _db.Users.FirstOrDefaultAsync(u => u.Id == actorUserId, ct);
+            _db.TicketHistories.Add(new TicketHistoryModel
+            {
+                Ticket = ticket,
+                OldStatus = oldStatus,
+                NewStatus = newStatus,
+                ChangedBy = actor,
+                ChangedAt = DateTime.UtcNow
+            });
+
+            await _db.SaveChangesAsync(ct);
+            return OperationResult.Ok();
+        }
+
+        public async Task<OperationResult> AssignTechnicianAsync(int ticketId, int? technicianId, int actorUserId, Role actorRole, CancellationToken ct = default)
+        {
+            if (actorRole != Role.Administrator && actorRole != Role.Technician)
+                return OperationResult.Fail("Brak uprawnień do przydzielania technika.");
+
+            var ticket = await _db.Tickets
+                .Include(t => t.Technician)
+                .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
+            if (ticket == null) return OperationResult.Fail("Zgłoszenie nie istnieje.");
+
+            if (actorRole == Role.Technician)
+            {
+                if (!technicianId.HasValue || technicianId.Value != actorUserId)
+                    return OperationResult.Fail("Technik może przydzielić wyłącznie samego siebie.");
+                if (ticket.Technician != null && ticket.Technician.Id != actorUserId)
+                    return OperationResult.Fail("Zgłoszenie jest już przydzielone do innego technika.");
+            }
+
+            if (technicianId.HasValue)
+            {
+                var tech = await _db.Users.FirstOrDefaultAsync(u => u.Id == technicianId.Value, ct);
+                if (tech == null || tech.IsDeleted) return OperationResult.Fail("Wybrany technik nie istnieje.");
+                if (tech.Role != Role.Technician && tech.Role != Role.Administrator)
+                    return OperationResult.Fail("Wybrany użytkownik nie może być technikiem.");
+                ticket.Technician = tech;
+            }
+            else
+            {
+                ticket.Technician = null;
+            }
+
+            ticket.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(ct);
+            return OperationResult.Ok();
+        }
+
+        public async Task<OperationResult> ChangePriorityAsync(int ticketId, int priorityId, int actorUserId, Role actorRole, CancellationToken ct = default)
+        {
+            if (actorRole != Role.Administrator && actorRole != Role.Technician)
+                return OperationResult.Fail("Brak uprawnień do zmiany priorytetu.");
+
+            var ticket = await _db.Tickets
+                .Include(t => t.Priority)
+                .Include(t => t.Technician)
+                .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
+            if (ticket == null) return OperationResult.Fail("Zgłoszenie nie istnieje.");
+
+            if (actorRole == Role.Technician && ticket.Technician?.Id != actorUserId)
+                return OperationResult.Fail("Możesz zmieniać priorytet tylko przydzielonych do Ciebie zgłoszeń.");
+
+            var priority = await _db.Priorities.FirstOrDefaultAsync(p => p.Id == priorityId, ct);
+            if (priority == null) return OperationResult.Fail("Wybrany priorytet nie istnieje.");
+
+            ticket.Priority = priority;
+            ticket.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(ct);
+            return OperationResult.Ok();
+        }
+
+        public async Task<OperationResult> AddCommentAsync(int ticketId, string content, int authorUserId, Role authorRole, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                return OperationResult.Fail("Treść komentarza jest wymagana.");
+
+            var ticket = await _db.Tickets
+                .Include(t => t.Status)
+                .Include(t => t.Reporter)
+                .Include(t => t.Technician)
+                .FirstOrDefaultAsync(t => t.Id == ticketId, ct);
+            if (ticket == null) return OperationResult.Fail("Zgłoszenie nie istnieje.");
+
+            if (ticket.Status != null && ticket.Status.IsClosed)
+                return OperationResult.Fail("Nie można dodawać komentarzy do zamkniętego zgłoszenia.");
+
+            var allowed = authorRole == Role.Administrator
+                          || authorRole == Role.Technician
+                          || ticket.Reporter?.Id == authorUserId;
+            if (!allowed) return OperationResult.Fail("Brak uprawnień do dodawania komentarzy w tym zgłoszeniu.");
+
+            var author = await _db.Users.FirstOrDefaultAsync(u => u.Id == authorUserId, ct);
+            if (author == null) return OperationResult.Fail("Nie znaleziono autora komentarza.");
+
+            _db.Comments.Add(new CommentModel
+            {
+                Content = content.Trim(),
+                Ticket = ticket,
+                User = author,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            ticket.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(ct);
+            return OperationResult.Ok();
+        }
+
+        public async Task<List<TicketNotificationViewModel>> GetNewTicketsSinceAsync(DateTime sinceUtc, CancellationToken ct = default)
+        {
+            try
+            {
+                return await _db.Tickets.AsNoTracking()
+                    .Where(t => t.CreatedAt > sinceUtc)
+                    .OrderBy(t => t.CreatedAt)
+                    .Take(50)
+                    .ProjectToType<TicketNotificationViewModel>()
+                    .ToListAsync(ct);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return new List<TicketNotificationViewModel>();
             }
         }
     }

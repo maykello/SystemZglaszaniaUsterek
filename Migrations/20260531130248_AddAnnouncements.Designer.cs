@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SystemZglaszaniaUsterek.Models.Entities;
 
@@ -11,9 +12,11 @@ using SystemZglaszaniaUsterek.Models.Entities;
 namespace SystemZglaszaniaUsterek.Migrations
 {
     [DbContext(typeof(SystemZglaszaniaUsterekDbContext))]
-    partial class SystemZglaszaniaUsterekDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260531130248_AddAnnouncements")]
+    partial class AddAnnouncements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Announcements", (string)null);
+                    b.ToTable("Announcements");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AttachmentModel", b =>
@@ -99,7 +102,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("Attachments", (string)null);
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CategoryModel", b =>
@@ -116,7 +119,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CommentModel", b =>
@@ -146,7 +149,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.PriorityModel", b =>
@@ -163,7 +166,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Priorities", (string)null);
+                    b.ToTable("Priorities");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.StatusModel", b =>
@@ -183,7 +186,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.TicketHistoryModel", b =>
@@ -219,7 +222,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("TicketHistories", (string)null);
+                    b.ToTable("TicketHistories");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.TicketModel", b =>
@@ -274,7 +277,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("TechnicianId");
 
-                    b.ToTable("Tickets", (string)null);
+                    b.ToTable("Tickets");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.UserModel", b =>
@@ -316,7 +319,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AnnouncementModel", b =>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Mapster;
 using SystemZglaszaniaUsterek.Data;
 using SystemZglaszaniaUsterek.Models.Entities;
 using SystemZglaszaniaUsterek.Models.Options;
@@ -31,9 +32,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
+builder.Services.AddMemoryCache();
+
 // Cloudinary configuration
 builder.Services.Configure<CloudinaryOptions>(
     builder.Configuration.GetSection(CloudinaryOptions.SectionName));
+
+// SMTP configuration
+builder.Services.Configure<SmtpOptions>(
+    builder.Configuration.GetSection(SmtpOptions.SectionName));
 
 // Multipart limits: max 5 files * 10 MB + bufor na same metadane formularza
 builder.Services.Configure<FormOptions>(options =>
@@ -48,6 +55,12 @@ builder.Services.AddSingleton<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IAttachmentValidator, AttachmentValidator>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
+// Mapster - skanuje assembly i rejestruje wszystkie IRegister
+TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
 var app = builder.Build();
 

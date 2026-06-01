@@ -4,16 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using SystemZglaszaniaUsterek.Models.Entities;
 using SystemZglaszaniaUsterek.Models.ViewModels;
+using SystemZglaszaniaUsterek.Services;
 
 namespace SystemZglaszaniaUsterek.Controllers
 {
     public class AuthController : Controller
     {
         private readonly SystemZglaszaniaUsterekDbContext _context;
+        private readonly IPasswordResetService _passwordResetService;
 
-        public AuthController(SystemZglaszaniaUsterekDbContext context)
+        public AuthController(SystemZglaszaniaUsterekDbContext context, IPasswordResetService passwordResetService)
         {
             _context = context;
+            _passwordResetService = passwordResetService;
         }
 
         [HttpGet]
@@ -95,6 +98,66 @@ namespace SystemZglaszaniaUsterek.Controllers
             }
 
             return Json(new { ok = true, serverTimeUtc = DateTime.UtcNow });
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View(new ForgotPasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var resetUrlBase = Url.Action(
+                action: nameof(ResetPassword),
+                controller: "Auth",
+                values: null,
+                protocol: Request.Scheme,
+                host: Request.Host.Value)!;
+
+            await _passwordResetService.RequestPasswordResetAsync(model.Email, resetUrlBase, ct);
+            TempData["ForgotPasswordMessage"] =
+                "Jeśli podany adres e-mail jest powiązany z aktywnym kontem, wysłaliśmy na niego link do ustawienia nowego hasła. " +
+                "Sprawdź skrzynkę odbiorczą oraz folder SPAM.";
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token) || !_passwordResetService.IsTokenValid(token))
+            {
+                ViewData["TokenInvalid"] = true;
+                return View();
+            }
+
+            return View(new ResetPasswordViewModel { Token = token });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var result = await _passwordResetService.CompleteResetAsync(model.Token, model.NewPassword, ct);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Error ?? "Nie udało się ustawić nowego hasła.");
+                return View(model);
+            }
+
+            TempData["LoginInfo"] = "Hasło zostało ustawione. Możesz się teraz zalogować.";
+            return RedirectToAction(nameof(Login));
         }
     }
 }
