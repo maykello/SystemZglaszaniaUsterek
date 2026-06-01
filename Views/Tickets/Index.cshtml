@@ -1,0 +1,144 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.TicketListResultViewModel
+@using SystemZglaszaniaUsterek.Models.ViewModels
+@{
+    ViewData["Title"] = "Zgłoszenia";
+    var role = User.IsInRole("Administrator") ? "Administrator"
+             : User.IsInRole("Technician") ? "Technician" : "User";
+}
+
+<h1 class="mb-3">Zgłoszenia</h1>
+
+@if (TempData["TicketActionMessage"] is string okMsg)
+{
+    <div class="alert alert-success">@okMsg</div>
+}
+@if (TempData["TicketActionError"] is string errMsg)
+{
+    <div class="alert alert-danger">@errMsg</div>
+}
+
+<form method="get" class="card card-body mb-4">
+    <div class="row g-2 align-items-end">
+        @if (role != "User")
+        {
+            <div class="col-md-2">
+                <label class="form-label">Zakres</label>
+                <select name="Scope" class="form-select">
+                    <option value="@TicketScope.Mine" selected="@(Model.Filter.Scope == TicketScope.Mine)">Moje zgłoszenia</option>
+                    <option value="@TicketScope.Assigned" selected="@(Model.Filter.Scope == TicketScope.Assigned)">Przydzielone do mnie</option>
+                    <option value="@TicketScope.All" selected="@(Model.Filter.Scope == TicketScope.All)">Wszystkie</option>
+                </select>
+            </div>
+        }
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="StatusId" class="form-select">
+                <option value="">-- dowolny --</option>
+                @foreach (var s in Model.Statuses)
+                {
+                    <option value="@s.Id" selected="@(Model.Filter.StatusId == s.Id)">@s.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Priorytet</label>
+            <select name="PriorityId" class="form-select">
+                <option value="">-- dowolny --</option>
+                @foreach (var p in Model.Priorities)
+                {
+                    <option value="@p.Id" selected="@(Model.Filter.PriorityId == p.Id)">@p.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Kategoria</label>
+            <select name="CategoryId" class="form-select">
+                <option value="">-- dowolna --</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id" selected="@(Model.Filter.CategoryId == c.Id)">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Od</label>
+            <input type="date" name="DateFrom" value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Do</label>
+            <input type="date" name="DateTo" value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Szukaj</label>
+            <input type="text" name="Search" value="@Model.Filter.Search" class="form-control" placeholder="tytuł lub opis" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filtruj</button>
+        </div>
+        <div class="col-md-2">
+            <a asp-action="Index" class="btn btn-outline-secondary w-100">Wyczyść</a>
+        </div>
+    </div>
+</form>
+
+<p class="text-muted">Łącznie: @Model.TotalCount</p>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tytuł</th>
+                <th>Kategoria</th>
+                <th>Priorytet</th>
+                <th>Status</th>
+                <th>Zgłaszający</th>
+                <th>Technik</th>
+                <th>Utworzono</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model.Items)
+            {
+                <tr>
+                    <td>@t.Id</td>
+                    <td>@t.Title</td>
+                    <td>@t.CategoryName</td>
+                    <td>@(t.PriorityName ?? "-")</td>
+                    <td>
+                        <span class="badge @(t.IsClosed ? "bg-success" : "bg-warning text-dark")">@t.StatusName</span>
+                    </td>
+                    <td>@(t.ReporterUsername ?? "-")</td>
+                    <td>@(t.TechnicianUsername ?? "-")</td>
+                    <td>@t.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">Szczegóły</a>
+                    </td>
+                </tr>
+            }
+            @if (Model.Items.Count == 0)
+            {
+                <tr><td colspan="9" class="text-center text-muted">Brak zgłoszeń pasujących do filtrów.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination">
+            @for (int p = 1; p <= Model.TotalPages; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link" href="?@($"Scope={Model.Filter.Scope}&StatusId={Model.Filter.StatusId}&PriorityId={Model.Filter.PriorityId}&CategoryId={Model.Filter.CategoryId}&DateFrom={Model.Filter.DateFrom?.ToString("yyyy-MM-dd")}&DateTo={Model.Filter.DateTo?.ToString("yyyy-MM-dd")}&Search={Model.Filter.Search}&Page={p}&PageSize={Model.PageSize}")">@p</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+<div class="mt-3">
+    <a asp-action="Create" class="btn btn-primary">+ Nowe zgłoszenie</a>
+</div>

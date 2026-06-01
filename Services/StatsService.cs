@@ -12,55 +12,68 @@ namespace SystemZglaszaniaUsterek.Services
     public class StatsService : IStatsService
     {
         private readonly SystemZglaszaniaUsterekDbContext _db;
+        private readonly ILogger<StatsService> _logger;
 
-        public StatsService(SystemZglaszaniaUsterekDbContext db)
+        public StatsService(SystemZglaszaniaUsterekDbContext db, ILogger<StatsService> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         public async Task<HomeIndexViewModel> GetHomeStatsAsync(CancellationToken ct = default)
         {
-            var now = DateTime.UtcNow;
-            var weekAgo = now.AddDays(-7);
+            var weekAgo = DateTime.UtcNow.AddDays(-7);
 
-            var ticketsWithStatus = _db.Tickets
-                .AsNoTracking()
-                .Include(t => t.Status);
-
-            var currentIssues = await ticketsWithStatus
-                .CountAsync(t => t.Status != null && !t.Status.IsClosed, ct);
-
-            var closedTickets = ticketsWithStatus
-                .Where(t => t.Status != null && t.Status.IsClosed);
-
-            var totalResolved = await closedTickets.CountAsync(ct);
-
-            var weekResolved = await closedTickets
-                .CountAsync(t => t.UpdatedAt != null && t.UpdatedAt >= weekAgo, ct);
-
-            var resolvedSpans = await closedTickets
-                .Where(t => t.UpdatedAt != null)
-                .Select(t => new { t.CreatedAt, t.UpdatedAt })
-                .ToListAsync(ct);
-
-            string avgText = "0h";
-            if (resolvedSpans.Count > 0)
+            try
             {
-                var avgHours = resolvedSpans
-                    .Select(x => Math.Max(0, ((x.UpdatedAt!.Value) - x.CreatedAt).TotalHours))
-                    .DefaultIfEmpty(0)
-                    .Average();
+                var rows = await _db.Tickets
+                    .AsNoTracking()
+                    .Select(t => new
+                    {
+                        IsClosed = t.Status != null && t.Status.IsClosed,
+                        t.CreatedAt,
+                        t.UpdatedAt
+                    })
+                    .ToListAsync(ct);
 
-                avgText = $"{Math.Round(avgHours, 0)}h";
+                var currentIssues = rows.Count(r => !r.IsClosed);
+                var closed = rows.Where(r => r.IsClosed).ToList();
+                var totalResolved = closed.Count;
+                var weekResolved = closed.Count(r => r.UpdatedAt != null && r.UpdatedAt >= weekAgo);
+
+                var spans = closed
+                    .Where(r => r.UpdatedAt != null)
+                    .Select(r => Math.Max(0, (r.UpdatedAt!.Value - r.CreatedAt).TotalHours))
+                    .ToList();
+
+                var avgHours = spans.Count == 0 ? 0 : spans.Average();
+                var avgText = $"{Math.Round(avgHours, 0)}h";
+
+                var announcements = await _db.Announcements
+                    .AsNoTracking()
+                    .Where(a => a.IsActive)
+                    .OrderByDescending(a => a.CreatedAt)
+                    .Take(10)
+                    .ToListAsync(ct);
+
+                return new HomeIndexViewModel
+                {
+                    CurrentIssues = currentIssues,
+                    TotalResolved = totalResolved,
+                    WeekResolved = weekResolved,
+                    AvgResolutionTimeText = avgText,
+                    Announcements = announcements
+                };
             }
-
-            return new HomeIndexViewModel
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
-                CurrentIssues = currentIssues,
-                TotalResolved = totalResolved,
-                WeekResolved = weekResolved,
-                AvgResolutionTimeText = avgText
-            };
+                return new HomeIndexViewModel();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Nie udało się pobrać statystyk strony głównej.");
+                return new HomeIndexViewModel();
+            }
         }
     }
 }

@@ -69,14 +69,37 @@
     <div class="container">
         <h2>Ogłoszenia o Usterkach Systemowych</h2>
         <div class="announcements-container" id="announcements">
-            <div class="announcement-item">
-                <div class="announcement-title">📢 Brak aktualnych ogłoszeń</div>
-                <div class="announcement-date">System gotów do pracy</div>
-                <div class="announcement-text">
-                    Aktualnie nie ma żadnych ogłoszeń o znanych usterkach systemowych. 
-                    System działa normalnie. Jeśli napotkasz jakikolwiek problem, zgłoś go po zalogowaniu.
+            @if (Model.Announcements != null && Model.Announcements.Count > 0)
+            {
+                foreach (var a in Model.Announcements)
+                {
+                    var (icon, badgeClass, badgeLabel) = a.Severity switch
+                    {
+                        SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Critical => ("🚨", "bg-danger", "Krytyczne"),
+                        SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Warning => ("⚠️", "bg-warning text-dark", "Ostrzeżenie"),
+                        _ => ("📢", "bg-info text-dark", "Info")
+                    };
+                    <div class="announcement-item">
+                        <div class="announcement-title">
+                            @icon @a.Title
+                            <span class="badge @badgeClass ms-2">@badgeLabel</span>
+                        </div>
+                        <div class="announcement-date">@a.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                        <div class="announcement-text">@a.Content</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="announcement-item">
+                    <div class="announcement-title">📢 Brak aktualnych ogłoszeń</div>
+                    <div class="announcement-date">System gotów do pracy</div>
+                    <div class="announcement-text">
+                        Aktualnie nie ma żadnych ogłoszeń o znanych usterkach systemowych.
+                        System działa normalnie. Jeśli napotkasz jakikolwiek problem, zgłoś go po zalogowaniu.
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 </section>
