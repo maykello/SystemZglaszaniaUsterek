@@ -18,6 +18,14 @@
     </div>
 
     <div class="admin-panel-content">
+        @if (TempData["UserActionMessage"] is string okMsg)
+        {
+            <div class="alert alert-success">@okMsg</div>
+        }
+        @if (TempData["UserActionError"] is string errMsg)
+        {
+            <div class="alert alert-danger">@errMsg</div>
+        }
         @if (Model.Any())
         {
             <div class="table-responsive">
@@ -61,9 +69,10 @@
                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-action-edit" title="Edytuj Użytkownika">
                                             Edytuj
                                         </a>
-                                        <a href="#" onclick="confirmDelete(@item.Id); return false;" class="btn-action btn-action-delete" title="Usuń Użytkownika">
-                                            Usuń
-                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz dezaktywować to konto?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-action btn-action-delete" title="Dezaktywuj">Usuń</button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -87,12 +96,3 @@
         }
     </div>
 </div>
-
-<script>
-    function confirmDelete(userId) {
-        if (confirm('Czy na pewno chcesz usunąć tego użytkownika? Tej operacji nie można cofnąć.')) {
-            window.location.href = `/Users/Delete/${userId}`;
-        }
-    }
-</script>
-
