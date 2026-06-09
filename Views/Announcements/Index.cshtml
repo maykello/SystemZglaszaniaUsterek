@@ -3,82 +3,101 @@
     ViewData["Title"] = "Ogłoszenia";
 }
 
-<h1 class="mb-3">Ogłoszenia o usterkach systemowych</h1>
+<div class="admin-panel-container">
+    <div class="container">
 
-@if (TempData["AnnouncementsMessage"] is string okMsg)
-{
-    <div class="alert alert-success">@okMsg</div>
-}
+        <div class="admin-panel-header">
+            <div class="admin-header-top">
+                <div>
+                    <h1 class="admin-panel-title">Ogłoszenia systemowe</h1>
+                    <p class="admin-panel-subtitle">Zarządzaj ogłoszeniami widocznymi dla użytkowników</p>
+                </div>
+                <a asp-action="Create" class="btn-add-user">+ Nowe ogłoszenie</a>
+            </div>
+        </div>
 
-<div class="mb-3">
-    <a asp-action="Create" class="btn btn-primary">+ Nowe ogłoszenie</a>
-</div>
+        @if (TempData["AnnouncementsMessage"] is string okMsg)
+        {
+            <div class="alert alert-success">@okMsg</div>
+        }
 
-@if (!Model.Any())
-{
-    <div class="alert alert-secondary">Brak ogłoszeń. Kliknij "Nowe ogłoszenie", aby coś dodać.</div>
-}
-else
-{
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Tytuł</th>
-                <th>Waga</th>
-                <th>Aktywne</th>
-                <th>Utworzono</th>
-                <th>Autor</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var a in Model)
+        <div class="admin-panel-content">
+            @if (!Model.Any())
             {
-                <tr>
-                    <td>@a.Id</td>
-                    <td>@a.Title</td>
-                    <td>
-                        @switch (a.Severity)
-                        {
-                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Info:
-                                <span class="badge bg-info text-dark">Info</span>
-                                break;
-                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Warning:
-                                <span class="badge bg-warning text-dark">Ostrzeżenie</span>
-                                break;
-                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Critical:
-                                <span class="badge bg-danger">Krytyczne</span>
-                                break;
-                        }
-                    </td>
-                    <td>
-                        @if (a.IsActive)
-                        {
-                            <span class="badge bg-success">tak</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">nie</span>
-                        }
-                    </td>
-                    <td>@a.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                    <td>@(a.CreatedBy?.Username ?? "-")</td>
-                    <td class="text-end">
-                        <a asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Edytuj</a>
-                        <form asp-action="ToggleActive" asp-route-id="@a.Id" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                @(a.IsActive ? "Ukryj" : "Aktywuj")
-                            </button>
-                        </form>
-                        <form asp-action="Delete" asp-route-id="@a.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć ogłoszenie? Tej operacji nie można cofnąć.');">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
-                        </form>
-                    </td>
-                </tr>
+                <div class="empty-users-state">
+                    <p>Brak ogłoszeń.</p>
+                    <a asp-action="Create" class="btn-add-user-empty">+ Nowe ogłoszenie</a>
+                </div>
             }
-        </tbody>
-    </table>
-}
+            else
+            {
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tytuł</th>
+                                <th>Waga</th>
+                                <th>Status</th>
+                                <th>Utworzono</th>
+                                <th>Autor</th>
+                                <th class="text-end">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in Model)
+                            {
+                                <tr>
+                                    <td data-label="#"><span class="user-date">@a.Id</span></td>
+                                    <td data-label="Tytuł"><span class="user-username">@a.Title</span></td>
+                                    <td data-label="Waga">
+                                        @switch (a.Severity)
+                                        {
+                                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Info:
+                                                <span class="role-badge badge-info">Info</span>
+                                                break;
+                                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Warning:
+                                                <span class="role-badge badge-warning">Ostrzeżenie</span>
+                                                break;
+                                            case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Critical:
+                                                <span class="role-badge badge-critical">Krytyczne</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td data-label="Status">
+                                        @if (a.IsActive)
+                                        {
+                                            <span class="role-badge badge-active">Aktywne</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="role-badge badge-inactive">Nieaktywne</span>
+                                        }
+                                    </td>
+                                    <td data-label="Utworzono"><span class="user-date">@a.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span></td>
+                                    <td data-label="Autor"><span class="user-name">@(a.CreatedBy?.Username ?? "-")</span></td>
+                                    <td data-label="Akcje" class="text-end">
+                                        <div class="action-buttons justify-content-end">
+                                            <a asp-action="Edit" asp-route-id="@a.Id" class="btn-action btn-action-edit">Edytuj</a>
+                                            <form asp-action="ToggleActive" asp-route-id="@a.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-action btn-action-role">
+                                                    @(a.IsActive ? "Ukryj" : "Aktywuj")
+                                                </button>
+                                            </form>
+                                            <form asp-action="Delete" asp-route-id="@a.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć ogłoszenie? Tej operacji nie można cofnąć.');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-action btn-action-delete">Usuń</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>

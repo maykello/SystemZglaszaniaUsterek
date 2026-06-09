@@ -3,43 +3,70 @@
     ViewData["Title"] = "Priorytety";
 }
 
-<h1 class="mb-3">Priorytety zgłoszeń</h1>
+<div class="admin-panel-container">
+    <div class="container">
 
-@if (TempData["PrioritiesMessage"] is string okMsg)
-{
-    <div class="alert alert-success">@okMsg</div>
-}
-@if (TempData["PrioritiesError"] is string errMsg)
-{
-    <div class="alert alert-danger">@errMsg</div>
-}
+        <div class="admin-panel-header">
+            <div class="admin-header-top">
+                <div>
+                    <h1 class="admin-panel-title">Priorytety zgłoszeń</h1>
+                    <p class="admin-panel-subtitle">Zarządzaj poziomami priorytetu</p>
+                </div>
+                <a asp-action="Create" class="btn-add-user">+ Nowy priorytet</a>
+            </div>
+        </div>
 
-<div class="mb-3">
-    <a asp-action="Create" class="btn btn-primary">+ Nowy priorytet</a>
-</div>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Nazwa</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
+        @if (TempData["PrioritiesMessage"] is string okMsg)
         {
-            <tr>
-                <td>@p.Id</td>
-                <td>@p.Name</td>
-                <td class="text-end">
-                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">Edytuj</a>
-                    <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć priorytet?');">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
-                    </form>
-                </td>
-            </tr>
+            <div class="alert alert-success">@okMsg</div>
         }
-    </tbody>
-</table>
+        @if (TempData["PrioritiesError"] is string errMsg)
+        {
+            <div class="alert alert-danger">@errMsg</div>
+        }
+
+        <div class="admin-panel-content">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nazwa</th>
+                            <th class="text-end">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td data-label="#"><span class="user-date">@p.Id</span></td>
+                                <td data-label="Nazwa"><span class="user-username">@p.Name</span></td>
+                                <td data-label="Akcje" class="text-end">
+                                    <div class="action-buttons justify-content-end">
+                                        <a asp-action="Edit" asp-route-id="@p.Id" class="btn-action btn-action-edit">Edytuj</a>
+                                        <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć priorytet?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-action btn-action-delete">Usuń</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3">
+                                    <div class="empty-users-state">
+                                        <p>Brak priorytetów. Dodaj pierwszy priorytet klikając przycisk powyżej.</p>
+                                        <a asp-action="Create" class="btn-add-user-empty">+ Nowy priorytet</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

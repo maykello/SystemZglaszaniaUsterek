@@ -3,43 +3,70 @@
     ViewData["Title"] = "Kategorie";
 }
 
-<h1 class="mb-3">Kategorie usterek</h1>
+<div class="admin-panel-container">
+    <div class="container">
 
-@if (TempData["CategoriesMessage"] is string okMsg)
-{
-    <div class="alert alert-success">@okMsg</div>
-}
-@if (TempData["CategoriesError"] is string errMsg)
-{
-    <div class="alert alert-danger">@errMsg</div>
-}
+        <div class="admin-panel-header">
+            <div class="admin-header-top">
+                <div>
+                    <h1 class="admin-panel-title">Kategorie usterek</h1>
+                    <p class="admin-panel-subtitle">Zarządzaj kategoriami zgłoszeń</p>
+                </div>
+                <a asp-action="Create" class="btn-add-user">+ Nowa kategoria</a>
+            </div>
+        </div>
 
-<div class="mb-3">
-    <a asp-action="Create" class="btn btn-primary">+ Nowa kategoria</a>
-</div>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Nazwa</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model)
+        @if (TempData["CategoriesMessage"] is string okMsg)
         {
-            <tr>
-                <td>@c.Id</td>
-                <td>@c.Name</td>
-                <td class="text-end">
-                    <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary">Edytuj</a>
-                    <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć kategorię?');">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
-                    </form>
-                </td>
-            </tr>
+            <div class="alert alert-success">@okMsg</div>
         }
-    </tbody>
-</table>
+        @if (TempData["CategoriesError"] is string errMsg)
+        {
+            <div class="alert alert-danger">@errMsg</div>
+        }
+
+        <div class="admin-panel-content">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nazwa</th>
+                            <th class="text-end">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td data-label="#"><span class="user-date">@c.Id</span></td>
+                                <td data-label="Nazwa"><span class="user-username">@c.Name</span></td>
+                                <td data-label="Akcje" class="text-end">
+                                    <div class="action-buttons justify-content-end">
+                                        <a asp-action="Edit" asp-route-id="@c.Id" class="btn-action btn-action-edit">Edytuj</a>
+                                        <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline" onsubmit="return confirm('Usunąć kategorię?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-action btn-action-delete">Usuń</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3">
+                                    <div class="empty-users-state">
+                                        <p>Brak kategorii. Dodaj pierwszą kategorię klikając przycisk powyżej.</p>
+                                        <a asp-action="Create" class="btn-add-user-empty">+ Nowa kategoria</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
