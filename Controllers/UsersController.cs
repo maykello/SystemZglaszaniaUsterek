@@ -111,6 +111,19 @@ namespace SystemZglaszaniaUsterek.Controllers
                 return NotFound();
             }
 
+            if (user.Role == Role.Administrator && model.Role != Role.Administrator)
+            {
+                var otherAdminsExist = await _context.Users.AnyAsync(
+                    u => u.Id != user.Id && u.Role == Role.Administrator && !u.IsDeleted, ct);
+
+                if (!otherAdminsExist)
+                {
+                    ModelState.AddModelError(nameof(model.Role),
+                        "Nie można zmienić roli. W systemie musi pozostać przynajmniej jeden administrator.");
+                    return View(model);
+                }
+            }
+
             user.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim();
             user.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? null : model.FirstName.Trim();
             user.LastName = string.IsNullOrWhiteSpace(model.LastName) ? null : model.LastName.Trim();
