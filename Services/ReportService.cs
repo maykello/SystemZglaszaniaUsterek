@@ -68,9 +68,13 @@ namespace SystemZglaszaniaUsterek.Services
                     .OrderByDescending(r => r.Count)
                     .ToListAsync(ct);
 
+                var page = filter.Page < 1 ? 1 : filter.Page;
+                var pageSize = filter.PageSize <= 0 ? 20 : Math.Min(filter.PageSize, 100);
+
                 var items = await query
                     .OrderByDescending(t => t.CreatedAt)
-                    .Take(500)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .ProjectToType<TicketListItemViewModel>()
                     .ToListAsync(ct);
 
@@ -80,6 +84,9 @@ namespace SystemZglaszaniaUsterek.Services
                     .ToListAsync(ct);
 
                 var categories = await _db.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(ct);
+
+                filter.Page = page;
+                filter.PageSize = pageSize;
 
                 return new ReportsRepairViewModel
                 {
@@ -93,6 +100,8 @@ namespace SystemZglaszaniaUsterek.Services
                     ByCategory = byCategory,
                     ByTechnician = byTechnician,
                     Items = items,
+                    Page = page,
+                    PageSize = pageSize,
                     Technicians = technicians,
                     Categories = categories
                 };

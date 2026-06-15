@@ -206,10 +206,7 @@ namespace SystemZglaszaniaUsterek.Services
                 var page = filter.Page < 1 ? 1 : filter.Page;
                 var pageSize = filter.PageSize <= 0 ? 20 : Math.Min(filter.PageSize, 100);
 
-                var ordered = currentRole == Role.Administrator
-                    ? query.OrderByDescending(t => t.Technician == null || t.Priority == null)
-                           .ThenByDescending(t => t.CreatedAt)
-                    : query.OrderByDescending(t => t.CreatedAt);
+                var ordered = ApplySort(query, filter.SortBy, filter.SortDesc, currentRole);
 
                 var items = await ordered
                     .Skip((page - 1) * pageSize)
@@ -234,6 +231,8 @@ namespace SystemZglaszaniaUsterek.Services
                         DateFrom = filter.DateFrom,
                         DateTo = filter.DateTo,
                         Search = filter.Search,
+                        SortBy = filter.SortBy,
+                        SortDesc = filter.SortDesc,
                         Page = page,
                         PageSize = pageSize
                     },
@@ -246,6 +245,36 @@ namespace SystemZglaszaniaUsterek.Services
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 return new TicketListResultViewModel { Filter = filter };
+            }
+        }
+
+        private static IOrderedQueryable<TicketModel> ApplySort(IQueryable<TicketModel> query, string? sortBy, bool sortDesc, Role currentRole)
+        {
+            switch (sortBy)
+            {
+                case "Id":
+                    return sortDesc ? query.OrderByDescending(t => t.Id) : query.OrderBy(t => t.Id);
+                case "Title":
+                    return sortDesc ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title);
+                case "Category":
+                    return sortDesc ? query.OrderByDescending(t => t.Category!.Name) : query.OrderBy(t => t.Category!.Name);
+                case "Priority":
+                    return sortDesc ? query.OrderByDescending(t => t.Priority!.Name) : query.OrderBy(t => t.Priority!.Name);
+                case "Status":
+                    return sortDesc ? query.OrderByDescending(t => t.Status!.Name) : query.OrderBy(t => t.Status!.Name);
+                case "Reporter":
+                    return sortDesc ? query.OrderByDescending(t => t.Reporter!.Username) : query.OrderBy(t => t.Reporter!.Username);
+                case "Technician":
+                    return sortDesc ? query.OrderByDescending(t => t.Technician!.Username) : query.OrderBy(t => t.Technician!.Username);
+                case "CreatedAt":
+                    return sortDesc ? query.OrderByDescending(t => t.CreatedAt) : query.OrderBy(t => t.CreatedAt);
+                default:
+                    return currentRole == Role.Administrator
+                        ? query.OrderByDescending(t => t.Status != null && t.Status.Name == DefaultStatusName)
+                               .ThenByDescending(t => t.Technician == null || t.Priority == null)
+                               .ThenByDescending(t => t.CreatedAt)
+                        : query.OrderByDescending(t => t.Status != null && t.Status.Name == DefaultStatusName)
+                               .ThenByDescending(t => t.CreatedAt);
             }
         }
 

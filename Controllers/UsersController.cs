@@ -127,49 +127,6 @@ namespace SystemZglaszaniaUsterek.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> EditRole(int id, CancellationToken ct)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var model = new EditUserRoleViewModel
-            {
-                UserId = user.Id,
-                Username = user.Username,
-                Role = user.Role
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> EditRole(EditUserRoleViewModel model, CancellationToken ct)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == model.UserId, ct);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            user.Role = model.Role;
-            await _context.SaveChangesAsync(ct);
-
-            TempData["UserActionMessage"] = $"Rola użytkownika '{user.Username}' została zaktualizowana.";
-            return RedirectToAction(nameof(Index));
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]

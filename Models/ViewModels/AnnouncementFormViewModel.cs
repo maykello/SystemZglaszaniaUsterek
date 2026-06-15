@@ -17,7 +17,7 @@ namespace SystemZglaszaniaUsterek.Models.ViewModels
         [Display(Name = "Treść ogłoszenia")]
         public string Content { get; set; } = string.Empty;
 
-        [Display(Name = "Waga")]
+        [Display(Name = "Ważność")]
         public AnnouncementSeverity Severity { get; set; } = AnnouncementSeverity.Info;
 
         [Display(Name = "Aktywne (widoczne na stronie głównej)")]

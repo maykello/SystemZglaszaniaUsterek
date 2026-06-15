@@ -1,6 +1,12 @@
 @model SystemZglaszaniaUsterek.Models.ViewModels.ReportsRepairViewModel
 @{
     ViewData["Title"] = "Raporty napraw";
+
+    string BuildQuery(int page)
+    {
+        return $"?DateFrom={Model.Filter.DateFrom?.ToString("yyyy-MM-dd")}&DateTo={Model.Filter.DateTo?.ToString("yyyy-MM-dd")}" +
+               $"&TechnicianId={Model.Filter.TechnicianId}&CategoryId={Model.Filter.CategoryId}&Page={page}&PageSize={Model.PageSize}";
+    }
 }
 
 <div class="reports-container">
@@ -88,7 +94,7 @@
             <div class="col-md-6">
                 <div class="report-section-card">
                     <div class="report-section-title">Wg statusu</div>
-                    <table class="report-section-table">
+                    <table class="report-section-table" data-sortable="true">
                         <thead><tr><th>Status</th><th class="text-end">Liczba</th></tr></thead>
                         <tbody>
                             @foreach (var r in Model.ByStatus)
@@ -102,7 +108,7 @@
             <div class="col-md-6">
                 <div class="report-section-card">
                     <div class="report-section-title">Wg priorytetu</div>
-                    <table class="report-section-table">
+                    <table class="report-section-table" data-sortable="true">
                         <thead><tr><th>Priorytet</th><th class="text-end">Liczba</th></tr></thead>
                         <tbody>
                             @foreach (var r in Model.ByPriority)
@@ -116,7 +122,7 @@
             <div class="col-md-6">
                 <div class="report-section-card">
                     <div class="report-section-title">Wg kategorii</div>
-                    <table class="report-section-table">
+                    <table class="report-section-table" data-sortable="true">
                         <thead><tr><th>Kategoria</th><th class="text-end">Liczba</th></tr></thead>
                         <tbody>
                             @foreach (var r in Model.ByCategory)
@@ -130,7 +136,7 @@
             <div class="col-md-6">
                 <div class="report-section-card">
                     <div class="report-section-title">Wg technika</div>
-                    <table class="report-section-table">
+                    <table class="report-section-table" data-sortable="true">
                         <thead><tr><th>Technik</th><th class="text-end">Liczba</th></tr></thead>
                         <tbody>
                             @foreach (var r in Model.ByTechnician)
@@ -145,10 +151,10 @@
 
         <div class="tickets-table-wrapper">
             <div style="padding: 20px 24px 0;">
-                <span class="report-list-header">Lista zgłoszeń (max 500)</span>
+                <span class="report-list-header">Lista zgłoszeń</span>
             </div>
             <div class="table-responsive">
-                <table class="tickets-table">
+                <table class="tickets-table" data-sortable="true">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -173,9 +179,35 @@
                                 <td data-label="Utworzono">@t.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
                             </tr>
                         }
+                        @if (Model.Items.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-users-state">
+                                        <p>Brak zgłoszeń pasujących do filtrów.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="tickets-footer">
+                    <nav>
+                        <ul class="pagination-custom">
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                <li class="page-item @(p == Model.Page ? "active" : "")">
+                                    <a class="page-link" href="@BuildQuery(p)">@p</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
         </div>
 
     </div>

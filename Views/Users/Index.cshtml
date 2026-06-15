@@ -29,7 +29,7 @@
         @if (Model.Any())
         {
             <div class="table-responsive">
-                <table class="users-table">
+                <table class="users-table" data-sortable="true">
                     <thead>
                         <tr>
                             <th>Nazwa użytkownika</th>
@@ -37,7 +37,7 @@
                             <th>Imię i Nazwisko</th>
                             <th>Rola</th>
                             <th>Data Utworzenia</th>
-                            <th>Akcje</th>
+                            <th data-no-sort="true">Akcje</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,9 +63,6 @@
                                 </td>
                                 <td data-label="Akcje">
                                     <div class="action-buttons">
-                                        <a asp-action="EditRole" asp-route-id="@item.Id" class="btn-action btn-action-role" title="Zmień Rolę">
-                                            Rola
-                                        </a>
                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-action-edit" title="Edytuj Użytkownika">
                                             Edytuj
                                         </a>

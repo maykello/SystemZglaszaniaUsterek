@@ -4,6 +4,22 @@
     ViewData["Title"] = "Zgłoszenia";
     var role = User.IsInRole("Administrator") ? "Administrator"
              : User.IsInRole("Technician") ? "Technician" : "User";
+
+    string BuildQuery(int page, string? sortBy, bool sortDesc)
+    {
+        return $"?Scope={Model.Filter.Scope}&StatusId={Model.Filter.StatusId}&PriorityId={Model.Filter.PriorityId}&CategoryId={Model.Filter.CategoryId}" +
+               $"&DateFrom={Model.Filter.DateFrom?.ToString("yyyy-MM-dd")}&DateTo={Model.Filter.DateTo?.ToString("yyyy-MM-dd")}&Search={Uri.EscapeDataString(Model.Filter.Search ?? "")}" +
+               $"&SortBy={sortBy}&SortDesc={sortDesc.ToString().ToLowerInvariant()}&Page={page}&PageSize={Model.PageSize}";
+    }
+
+    string SortUrl(string column)
+    {
+        var nextDesc = Model.Filter.SortBy == column && !Model.Filter.SortDesc;
+        return BuildQuery(1, column, nextDesc);
+    }
+
+    string SortArrowClass(string column)
+        => Model.Filter.SortBy != column ? "" : Model.Filter.SortDesc ? "sort-desc" : "sort-asc";
 }
 
 <div class="tickets-container">
@@ -95,14 +111,14 @@
                 <table class="tickets-table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Tytuł</th>
-                            <th>Kategoria</th>
-                            <th>Priorytet</th>
-                            <th>Status</th>
-                            <th>Zgłaszający</th>
-                            <th>Technik</th>
-                            <th>Utworzono</th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Id")" href="@SortUrl("Id")">#<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Title")" href="@SortUrl("Title")">Tytuł<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Category")" href="@SortUrl("Category")">Kategoria<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Priority")" href="@SortUrl("Priority")">Priorytet<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Status")" href="@SortUrl("Status")">Status<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Reporter")" href="@SortUrl("Reporter")">Zgłaszający<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("Technician")" href="@SortUrl("Technician")">Technik<span class="sort-arrow"></span></a></th>
+                            <th><a class="sort-link sortable-th @SortArrowClass("CreatedAt")" href="@SortUrl("CreatedAt")">Utworzono<span class="sort-arrow"></span></a></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -115,7 +131,7 @@
                                 <td data-label="Kategoria">@t.CategoryName</td>
                                 <td data-label="Priorytet">@(t.PriorityName ?? "-")</td>
                                 <td data-label="Status">
-                                    <span class="badge @(t.IsClosed ? "bg-success" : "bg-warning text-dark")">@t.StatusName</span>
+                                    <span class="badge @(t.IsClosed ? "bg-success" : t.StatusName == "Nowe" ? "bg-danger" : "bg-warning text-dark")">@t.StatusName</span>
                                 </td>
                                 <td data-label="Zgłaszający">@(t.ReporterUsername ?? "-")</td>
                                 <td data-label="Technik">@(t.TechnicianUsername ?? "-")</td>
@@ -147,7 +163,7 @@
                             @for (int p = 1; p <= Model.TotalPages; p++)
                             {
                                 <li class="page-item @(p == Model.Page ? "active" : "")">
-                                    <a class="page-link" href="?@($"Scope={Model.Filter.Scope}&StatusId={Model.Filter.StatusId}&PriorityId={Model.Filter.PriorityId}&CategoryId={Model.Filter.CategoryId}&DateFrom={Model.Filter.DateFrom?.ToString("yyyy-MM-dd")}&DateTo={Model.Filter.DateTo?.ToString("yyyy-MM-dd")}&Search={Model.Filter.Search}&Page={p}&PageSize={Model.PageSize}")">@p</a>
+                                    <a class="page-link" href="@BuildQuery(p, Model.Filter.SortBy, Model.Filter.SortDesc)">@p</a>
                                 </li>
                             }
                         </ul>

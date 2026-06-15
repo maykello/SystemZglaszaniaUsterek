@@ -32,16 +32,16 @@
             else
             {
                 <div class="table-responsive">
-                    <table class="data-table">
+                    <table class="data-table" data-sortable="true">
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Tytuł</th>
-                                <th>Waga</th>
+                                <th>Ważność</th>
                                 <th>Status</th>
                                 <th>Utworzono</th>
                                 <th>Autor</th>
-                                <th class="text-end">Akcje</th>
+                                <th class="text-end" data-no-sort="true">Akcje</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,7 +50,7 @@
                                 <tr>
                                     <td data-label="#"><span class="user-date">@a.Id</span></td>
                                     <td data-label="Tytuł"><span class="user-username">@a.Title</span></td>
-                                    <td data-label="Waga">
+                                    <td data-label="Ważność">
                                         @switch (a.Severity)
                                         {
                                             case SystemZglaszaniaUsterek.Models.Enums.AnnouncementSeverity.Info:
