@@ -1,4 +1,5 @@
 @model SystemZglaszaniaUsterek.Models.ViewModels.TicketDetailsViewModel
+@using SystemZglaszaniaUsterek.Models.Enums
 @{
     ViewData["Title"] = $"Zgłoszenie #{Model.Id}";
 }
@@ -130,7 +131,7 @@
                                         <option value="">(brak)</option>
                                         @foreach (var u in Model.AvailableTechnicians)
                                         {
-                                            <option value="@u.Id" selected="@(Model.TechnicianId == u.Id)">@u.Username (@u.Role)</option>
+                                            <option value="@u.Id" selected="@(Model.TechnicianId == u.Id)">@u.Username (@u.Role.ToDisplayName())</option>
                                         }
                                     </select>
                                 </div>

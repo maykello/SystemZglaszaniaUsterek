@@ -198,11 +198,18 @@
                 <div class="tickets-footer">
                     <nav>
                         <ul class="pagination-custom">
-                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            @foreach (var p in PaginationHelper.GetPageItems(Model.Page, Model.TotalPages))
                             {
-                                <li class="page-item @(p == Model.Page ? "active" : "")">
-                                    <a class="page-link" href="@BuildQuery(p)">@p</a>
-                                </li>
+                                if (p is null)
+                                {
+                                    <li class="page-item page-ellipsis"><span class="page-link">&hellip;</span></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                                        <a class="page-link" href="@BuildQuery(p.Value)">@p</a>
+                                    </li>
+                                }
                             }
                         </ul>
                     </nav>

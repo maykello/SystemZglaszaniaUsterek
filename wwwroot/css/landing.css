@@ -631,6 +631,7 @@
 }
 
 .role-administrator { background-color: #ffe0e0; color: #c33; }
+.role-technician    { background-color: #ede9fe; color: #7c3aed; }
 .role-user          { background-color: #e0f2fe; color: #0369a1; }
 .badge-info         { background-color: #dbeafe; color: #1d4ed8; }
 .badge-warning      { background-color: #fef3c7; color: #d97706; }
@@ -858,10 +859,26 @@
 
 .pagination-custom {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.pagination-custom .page-item.page-ellipsis .page-link {
+  border: none;
+  background: transparent;
+  width: auto;
+  min-width: 24px;
+  padding: 0 2px;
+  color: var(--text-light);
+  cursor: default;
+}
+
+.pagination-custom .page-item.page-ellipsis .page-link:hover {
+  background: transparent;
+  color: var(--text-light);
 }
 
 .pagination-custom .page-item .page-link {
@@ -1162,7 +1179,9 @@
   .ticket-main-card-body,
   .section-card-body         { padding: 18px 20px; }
   .ticket-meta-grid          { grid-template-columns: 1fr 1fr; }
-  .tickets-footer            { flex-direction: column; align-items: flex-start; }
+  .tickets-footer            { flex-direction: column; align-items: stretch; }
+  .tickets-footer nav        { width: 100%; }
+  .pagination-custom         { justify-content: center; }
 }
 
 @media (max-width: 576px) {
@@ -1207,6 +1226,10 @@
   .tickets-page-title,
   .reports-page-title { font-size: 1.4rem; }
   .ticket-meta-grid   { grid-template-columns: 1fr; }
+
+  /* Pagination */
+  .tickets-footer { padding: 16px; }
+  .pagination-custom .page-item .page-link { width: 32px; height: 32px; font-size: 0.85rem; }
 
   /* Give row-cards a little breathing room from the outer rounded card */
   .table-responsive { padding: 4px; }
