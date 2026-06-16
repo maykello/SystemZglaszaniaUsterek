@@ -1,5 +1,3 @@
-# APLIKACJA W PROCESIE TWORZENIA, PONIŻEJ OPIS TEORETYCZNY
-
 # System zgłaszania usterek w firmie / akademiku
 
 System zgłaszania usterek to aplikacja webowa przeznaczona dla firm lub akademików,
@@ -18,9 +16,10 @@ Użytkownik zwykły może:
 
 - Logować się do systemu
 - Edytować własny profilu
-- Zgłaszać nowe usterki (tytuł, opis, lokalizacja, priorytet)
-- Przeglądać swoje zgłoszeń
-- Sprawdzać status zgłoszenia
+- Zgłaszać nowe usterki (tytuł, opis, lokalizacja)
+- Przeglądać swoje zgłoszenia
+- Sprawdzać status swojego zgłoszenia
+- Dodawanie komentarzy do zgłoszeń
 
 Możliwości technika:
 
