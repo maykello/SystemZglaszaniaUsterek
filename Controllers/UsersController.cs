@@ -111,6 +111,19 @@ namespace SystemZglaszaniaUsterek.Controllers
                 return NotFound();
             }
 
+            if (user.Role == Role.Administrator && model.Role != Role.Administrator)
+            {
+                var otherAdminsExist = await _context.Users.AnyAsync(
+                    u => u.Id != user.Id && u.Role == Role.Administrator && !u.IsDeleted, ct);
+
+                if (!otherAdminsExist)
+                {
+                    ModelState.AddModelError(nameof(model.Role),
+                        "Nie można zmienić roli. W systemie musi pozostać przynajmniej jeden administrator.");
+                    return View(model);
+                }
+            }
+
             user.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim();
             user.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? null : model.FirstName.Trim();
             user.LastName = string.IsNullOrWhiteSpace(model.LastName) ? null : model.LastName.Trim();
@@ -124,49 +137,6 @@ namespace SystemZglaszaniaUsterek.Controllers
             await _context.SaveChangesAsync(ct);
 
             TempData["UserActionMessage"] = $"Dane użytkownika '{user.Username}' zostały zaktualizowane.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> EditRole(int id, CancellationToken ct)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var model = new EditUserRoleViewModel
-            {
-                UserId = user.Id,
-                Username = user.Username,
-                Role = user.Role
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> EditRole(EditUserRoleViewModel model, CancellationToken ct)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == model.UserId, ct);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            user.Role = model.Role;
-            await _context.SaveChangesAsync(ct);
-
-            TempData["UserActionMessage"] = $"Rola użytkownika '{user.Username}' została zaktualizowana.";
             return RedirectToAction(nameof(Index));
         }
 
