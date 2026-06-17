@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -83,15 +84,7 @@ namespace SystemZglaszaniaUsterek.Controllers
                 return NotFound();
             }
 
-            var model = new UserEditViewModel
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role
-            };
+            var model = user.Adapt<UserEditViewModel>();
             return View(model);
         }
 
@@ -177,13 +170,7 @@ namespace SystemZglaszaniaUsterek.Controllers
                 return Forbid();
             }
 
-            var model = new ProfileEditViewModel
-            {
-                Username = user.Username,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName
-            };
+            var model = user.Adapt<ProfileEditViewModel>();
             return View(model);
         }
 
