@@ -2,11 +2,6 @@ namespace SystemZglaszaniaUsterek.Helpers
 {
     public static class PaginationHelper
     {
-        /// <summary>
-        /// Returns the page numbers to display: always the first and last page,
-        /// the previous page, the current page and up to 5 following pages.
-        /// A <c>null</c> entry marks a gap (rendered as "…").
-        /// </summary>
         public static List<int?> GetPageItems(int currentPage, int totalPages)
         {
             var result = new List<int?>();
