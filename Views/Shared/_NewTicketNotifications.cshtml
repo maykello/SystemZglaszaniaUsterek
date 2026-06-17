@@ -1,0 +1,163 @@
+@*
+    Lekkie powiadomienia o nowych zgłoszeniach dla technika i admina.
+    Polling co 15 s; każde powiadomienie znika automatycznie po 60 s
+    lub po kliknięciu krzyżyka.
+*@
+
+<style>
+    .notif-stack {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 1080;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 360px;
+    }
+    .notif-card {
+        background: #fff;
+        border: 1px solid #d0d7de;
+        border-left: 4px solid #0d6efd;
+        border-radius: 6px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.12);
+        padding: 12px 14px;
+        font-size: 14px;
+        color: #1f2328;
+        animation: notif-slide-in .2s ease-out;
+    }
+    .notif-card .notif-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .notif-card .notif-meta {
+        font-size: 12px;
+        color: #57606a;
+        margin-bottom: 6px;
+    }
+    .notif-card .notif-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    .notif-card .notif-close {
+        position: absolute;
+        top: 4px;
+        right: 6px;
+        background: transparent;
+        border: 0;
+        font-size: 18px;
+        line-height: 1;
+        color: #57606a;
+        cursor: pointer;
+    }
+    .notif-card-wrap {
+        position: relative;
+    }
+    @@keyframes notif-slide-in {
+        from { transform: translateY(8px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+
+<div id="newTicketNotifications" class="notif-stack" aria-live="polite" aria-atomic="false"></div>
+
+<script>
+(function () {
+    const POLL_MS = 15000;
+    const TTL_MS = 60000;
+    const STORAGE_KEY = 'newTicketNotifications.lastSeen';
+    const SEEN_IDS_KEY = 'newTicketNotifications.seenIds';
+
+    const stack = document.getElementById('newTicketNotifications');
+    if (!stack) return;
+
+    function loadSeenIds() {
+        try {
+            const raw = sessionStorage.getItem(SEEN_IDS_KEY);
+            return raw ? new Set(JSON.parse(raw)) : new Set();
+        } catch (_) { return new Set(); }
+    }
+    function saveSeenIds(set) {
+        try {
+            const arr = Array.from(set).slice(-200);
+            sessionStorage.setItem(SEEN_IDS_KEY, JSON.stringify(arr));
+        } catch (_) { /* ignore */ }
+    }
+    function getLastSeen() {
+        const v = sessionStorage.getItem(STORAGE_KEY);
+        return v ? Number(v) : (Date.now() - TTL_MS);
+    }
+    function setLastSeen(ts) {
+        sessionStorage.setItem(STORAGE_KEY, String(ts));
+    }
+
+    function escapeHtml(s) {
+        return String(s ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function showNotification(item) {
+        const wrap = document.createElement('div');
+        wrap.className = 'notif-card-wrap';
+
+        const card = document.createElement('div');
+        card.className = 'notif-card';
+
+        const meta = [];
+        if (item.reporter) meta.push('od ' + escapeHtml(item.reporter));
+        if (item.category) meta.push(escapeHtml(item.category));
+
+        card.innerHTML = `
+            <button type="button" class="notif-close" aria-label="Zamknij">&times;</button>
+            <a class="notif-link" href="/Tickets/Details/${item.id}">
+                <div class="notif-title">Nowe zgłoszenie #${item.id}</div>
+                <div class="notif-meta">${meta.join(' · ')}</div>
+                <div>${escapeHtml(item.title)}</div>
+            </a>
+        `;
+        wrap.appendChild(card);
+
+        const close = card.querySelector('.notif-close');
+        const removeSelf = () => { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); };
+        close.addEventListener('click', removeSelf);
+        setTimeout(removeSelf, TTL_MS);
+
+        stack.appendChild(wrap);
+    }
+
+    async function poll() {
+        try {
+            const since = getLastSeen();
+            const res = await fetch('/Tickets/Notifications?sinceUnixMs=' + since, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            const seen = loadSeenIds();
+            const fresh = (data.items || []).filter(i => !seen.has(i.id));
+
+            for (const item of fresh) {
+                showNotification(item);
+                seen.add(item.id);
+            }
+            saveSeenIds(seen);
+            if (data.serverTimeUnixMs) {
+                setLastSeen(data.serverTimeUnixMs);
+            }
+        } catch (_) {
+            // ignoruj błędy sieci - następna próba za POLL_MS
+        }
+    }
+
+    // pierwszy strzał krótko po załadowaniu strony, potem cyklicznie
+    setTimeout(poll, 1500);
+    setInterval(poll, POLL_MS);
+})();
+</script>

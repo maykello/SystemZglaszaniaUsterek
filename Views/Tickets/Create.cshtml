@@ -1,0 +1,150 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.TicketCreateViewModel
+
+@{
+    ViewData["Title"] = "Zgłoś Usterkę";
+}
+
+<div class="ticket-create-container">
+    <div class="ticket-create-header">
+        <h1 class="ticket-create-title">Zgłoś Usterkę</h1>
+        <p class="ticket-create-subtitle">Pomóż nam ulepszyć system zgłaszając problemy, które napotkasz</p>
+    </div>
+
+    <div class="ticket-create-content">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" class="ticket-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Błąd w formularzu!</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Podstawowe Informacje</h3>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Title" class="form-label">Tytuł Usterki *</label>
+                    <input asp-for="Title" class="form-control form-control-lg" 
+                           placeholder="Krótko opisz problem (np. Login nie działa na stronie głównej)" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                    <small class="form-text text-muted">Wymaganego od 5 do 200 znaków</small>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Description" class="form-label">Opis Usterki *</label>
+                    <textarea asp-for="Description" class="form-control form-control-lg" rows="6"
+                              placeholder="Szczegółowo opisz problem, kroki do jego reprodukcji i oczekiwany rezultat"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                    <small class="form-text text-muted">Wymagane od 10 do 2000 znaków</small>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Location" class="form-label">Lokalizacja Problemu (Opcjonalnie)</label>
+                    <input asp-for="Location" class="form-control form-control-lg" 
+                           placeholder="Gdzie dokładnie w systemie pojawia się problem?" />
+                    <small class="form-text text-muted">Np. Panel Administracyjny > Zarządzanie Użytkownikami</small>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="CategoryId" class="form-label">Kategoria *</label>
+                    <select asp-for="CategoryId" class="form-select form-select-lg">
+                        <option value="">-- Wybierz kategorię --</option>
+                        @if (Model?.Categories != null)
+                        {
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    <small class="form-text text-muted">Wybierz kategorię, która najlepiej opisuje problem</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Przesłanie Zdjęć (Opcjonalnie)</h3>
+                <p class="form-section-description">
+                    Dodaj zdjęcia ekranu lub screencasty, aby lepiej zobrazować problem. 
+                    Może to bardzo pomóc w debugowaniu.
+                </p>
+
+                <div class="form-group mb-4">
+                    <div class="file-upload-area">
+                        <input asp-for="AttachedFiles" type="file" class="file-upload-input" 
+                               multiple accept="image/*,video/*" id="fileInput" />
+                        <label for="fileInput" class="file-upload-label">
+                            <div class="file-upload-icon">📎</div>
+                            <div class="file-upload-text">
+                                <p class="file-upload-title">Przesłań zdjęcia lub pliki</p>
+                                <p class="file-upload-subtitle">Kliknij lub przeciągnij pliki tutaj</p>
+                            </div>
+                            <p class="file-upload-formats">Obsługiwane formaty: JPG, PNG, GIF, MP4, WebM</p>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted d-block mt-2">
+                        Maksymalnie 5 plików, każdy do 10 MB
+                    </small>
+                </div>
+
+                <div id="filePreview" class="file-preview-container d-none">
+                    <h5 class="file-preview-title">Przesłane pliki:</h5>
+                    <div id="fileList" class="file-list"></div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit-ticket">
+                    Zgłoś Usterkę
+                </button>
+                <a href="/" class="btn btn-cancel-ticket">
+                    Anuluj
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const files = e.target.files;
+        const fileList = document.getElementById('fileList');
+        const filePreview = document.getElementById('filePreview');
+
+        if (files.length > 0) {
+            fileList.innerHTML = '';
+            Array.from(files).forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-icon">📄</span>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+            filePreview.classList.remove('d-none');
+        } else {
+            filePreview.classList.add('d-none');
+        }
+    });
+
+    document.getElementById('fileInput').addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.parentElement.classList.add('dragover');
+    });
+
+    document.getElementById('fileInput').addEventListener('dragleave', function(e) {
+        this.parentElement.classList.remove('dragover');
+    });
+
+    document.getElementById('fileInput').addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.parentElement.classList.remove('dragover');
+        this.files = e.dataTransfer.files;
+        const event = new Event('change', { bubbles: true });
+        this.dispatchEvent(event);
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

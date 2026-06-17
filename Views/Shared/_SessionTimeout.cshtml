@@ -1,0 +1,51 @@
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    const int idleSecondsBeforeWarning = 5 * 60;
+    const int warningCountdownSeconds = 50;
+
+    var tokens = Antiforgery.GetAndStoreTokens(Context);
+}
+
+<div class="modal fade"
+     id="sessionTimeoutModal"
+     tabindex="-1"
+     aria-labelledby="sessionTimeoutModalLabel"
+     aria-hidden="true"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sessionTimeoutModalLabel">Sesja wkrótce wygaśnie</h5>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Z powodu braku aktywności Twoja sesja wygaśnie za
+                    <strong><span id="sessionTimeoutCountdown">@warningCountdownSeconds</span></strong> s.
+                </p>
+                <p class="mb-0">Czy chcesz pozostać zalogowany?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="sessionTimeoutLogoutBtn">
+                    Wyloguj
+                </button>
+                <button type="button" class="btn btn-primary" id="sessionTimeoutStayBtn">
+                    Pozostań zalogowany
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="sessionTimeoutLogoutForm" asp-controller="Auth" asp-action="Logout" method="post" class="d-none">
+</form>
+
+<script>
+    window.sessionTimeoutConfig = {
+        idleMs: @(idleSecondsBeforeWarning * 1000),
+        warningMs: @(warningCountdownSeconds * 1000),
+        pingUrl: '@Url.Action("Ping", "Auth")',
+        antiForgeryToken: '@tokens.RequestToken'
+    };
+</script>

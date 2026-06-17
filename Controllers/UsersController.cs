@@ -1,11 +1,16 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SystemZglaszaniaUsterek.Models.Entities;
+using SystemZglaszaniaUsterek.Models.Enums;
 using SystemZglaszaniaUsterek.Models.ViewModels;
 
 namespace SystemZglaszaniaUsterek.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     public class UsersController : Controller
     {
         private readonly SystemZglaszaniaUsterekDbContext _context;
@@ -15,50 +20,224 @@ namespace SystemZglaszaniaUsterek.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        // ----- Admin: list of users -----
+
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var users = _context.Users.OrderBy(u => u.Username).ToList();
+            var users = await _context.Users.OrderBy(u => u.Username).ToListAsync(ct);
             return View(users);
         }
 
+        // ----- Admin: create user -----
+
         [HttpGet]
-        public IActionResult EditRole(int id)
+        [Authorize(Roles = "Administrator")]
+        public IActionResult Create()
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+            return View(new UserCreateViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Create(UserCreateViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var trimmedUsername = model.Username.Trim();
+            if (await _context.Users.AnyAsync(u => u.Username == trimmedUsername, ct))
+            {
+                ModelState.AddModelError(nameof(model.Username), "Nazwa użytkownika jest już zajęta.");
+                return View(model);
+            }
+
+            var user = new UserModel
+            {
+                Username = trimmedUsername,
+                Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim(),
+                FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? null : model.FirstName.Trim(),
+                LastName = string.IsNullOrWhiteSpace(model.LastName) ? null : model.LastName.Trim(),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Role = model.Role,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync(ct);
+
+            TempData["UserActionMessage"] = $"Użytkownik '{user.Username}' został utworzony.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Edit(int id, CancellationToken ct)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
             if (user == null)
             {
                 return NotFound();
             }
 
-            var model = new EditUserRoleViewModel
+            var model = new UserEditViewModel
             {
-                UserId = user.Id,
+                Id = user.Id,
                 Username = user.Username,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Role = user.Role
             };
-
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditRole(EditUserRoleViewModel model)
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Edit(UserEditViewModel model, CancellationToken ct)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = _context.Users.FirstOrDefault(u => u.Id == model.UserId);
-                if (user == null)
+                return View(model);
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == model.Id, ct);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.Role == Role.Administrator && model.Role != Role.Administrator)
+            {
+                var otherAdminsExist = await _context.Users.AnyAsync(
+                    u => u.Id != user.Id && u.Role == Role.Administrator && !u.IsDeleted, ct);
+
+                if (!otherAdminsExist)
                 {
-                    return NotFound();
+                    ModelState.AddModelError(nameof(model.Role),
+                        "Nie można zmienić roli. W systemie musi pozostać przynajmniej jeden administrator.");
+                    return View(model);
                 }
+            }
 
-                user.Role = model.Role;
-                _context.SaveChanges();
+            user.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim();
+            user.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? null : model.FirstName.Trim();
+            user.LastName = string.IsNullOrWhiteSpace(model.LastName) ? null : model.LastName.Trim();
+            user.Role = model.Role;
 
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+            }
+
+            await _context.SaveChangesAsync(ct);
+
+            TempData["UserActionMessage"] = $"Dane użytkownika '{user.Username}' zostały zaktualizowane.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var currentIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(currentIdClaim, out var currentId) && currentId == user.Id)
+            {
+                TempData["UserActionError"] = "Nie możesz usunąć własnego konta.";
                 return RedirectToAction(nameof(Index));
             }
 
+            if (!user.IsDeleted)
+            {
+                user.IsDeleted = true;
+                user.DeletedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(ct);
+            }
+
+            TempData["UserActionMessage"] = $"Konto użytkownika '{user.Username}' zostało dezaktywowane.";
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpGet]
+        public async Task<IActionResult> Profile(CancellationToken ct)
+        {
+            var user = await GetCurrentUserAsync(ct);
+            if (user == null)
+            {
+                return Forbid();
+            }
+
+            var model = new ProfileEditViewModel
+            {
+                Username = user.Username,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            };
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(ProfileEditViewModel model, CancellationToken ct)
+        {
+            var user = await GetCurrentUserAsync(ct);
+            if (user == null)
+            {
+                return Forbid();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Username = user.Username;
+                return View(model);
+            }
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                if (string.IsNullOrEmpty(model.CurrentPassword) ||
+                    !BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash))
+                {
+                    ModelState.AddModelError(nameof(model.CurrentPassword), "Aktualne hasło jest nieprawidłowe.");
+                    model.Username = user.Username;
+                    return View(model);
+                }
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+            }
+
+            user.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim();
+            user.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? null : model.FirstName.Trim();
+            user.LastName = string.IsNullOrWhiteSpace(model.LastName) ? null : model.LastName.Trim();
+
+            await _context.SaveChangesAsync(ct);
+
+            TempData["UserActionMessage"] = "Profil został zaktualizowany.";
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Auth");
+            }
+
+            return RedirectToAction(nameof(Profile));
+        }
+
+        private async Task<UserModel?> GetCurrentUserAsync(CancellationToken ct)
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(idClaim, out var id))
+            {
+                return null;
+            }
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted, ct);
         }
     }
 }

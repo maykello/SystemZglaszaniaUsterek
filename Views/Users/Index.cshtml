@@ -1,34 +1,95 @@
 @model IEnumerable<SystemZglaszaniaUsterek.Models.Entities.UserModel>
 
 @{
-    ViewData["Title"] = "Użytkownicy";
+    ViewData["Title"] = "Zarządzanie Użytkownikami";
 }
 
-<h1 class="mb-4">Lista użytkowników</h1>
+<div class="admin-panel-container">
+    <div class="admin-panel-header">
+        <div class="admin-header-top">
+            <div>
+                <h1 class="admin-panel-title">Zarządzanie Użytkownikami</h1>
+                <p class="admin-panel-subtitle">Panel administracyjny - zarządzaj rolami i danymi użytkowników</p>
+            </div>
+            <a asp-action="Create" class="btn btn-add-user">
+                <span>+ Dodaj Użytkownika</span>
+            </a>
+        </div>
+    </div>
 
-<table class="table table-striped table-hover shadow-sm">
-    <thead class="table-dark">
-        <tr>
-            <th>Nazwa użytkownika</th>
-            <th>Email</th>
-            <th>Imię i nazwisko</th>
-            <th>Rola</th>
-            <th>Data utworzenia</th>
-            <th>Akcje</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model) {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Username)</td>
-                <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                <td>@(item.FirstName + " " + item.LastName)</td>
-                <td>@Html.DisplayFor(modelItem => item.Role)</td>
-                <td>@item.CreatedAt.ToLocalTime().ToString("g")</td>
-                <td>
-                    <a asp-action="EditRole" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Zmień Rolę</a>
-                </td>
-            </tr>
+    <div class="admin-panel-content">
+        @if (TempData["UserActionMessage"] is string okMsg)
+        {
+            <div class="alert alert-success">@okMsg</div>
         }
-    </tbody>
-</table>
+        @if (TempData["UserActionError"] is string errMsg)
+        {
+            <div class="alert alert-danger">@errMsg</div>
+        }
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="users-table" data-sortable="true">
+                    <thead>
+                        <tr>
+                            <th>Nazwa użytkownika</th>
+                            <th>Email</th>
+                            <th>Imię i Nazwisko</th>
+                            <th>Rola</th>
+                            <th>Data Utworzenia</th>
+                            <th data-no-sort="true">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="user-row">
+                                <td data-label="Nazwa użytkownika">
+                                    <span class="user-username">@Html.DisplayFor(modelItem => item.Username)</span>
+                                </td>
+                                <td data-label="Email">
+                                    <a href="mailto:@item.Email" class="user-email">@Html.DisplayFor(modelItem => item.Email)</a>
+                                </td>
+                                <td data-label="Imię i Nazwisko">
+                                    <span class="user-name">@(item.FirstName + " " + item.LastName)</span>
+                                </td>
+                                <td data-label="Rola">
+                                    <span class="role-badge role-@item.Role.ToString().ToLower()">
+                                        @Html.DisplayFor(modelItem => item.Role)
+                                    </span>
+                                </td>
+                                <td data-label="Data Utworzenia">
+                                    <span class="user-date">@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                </td>
+                                <td data-label="Akcje">
+                                    <div class="action-buttons">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-action-edit" title="Edytuj Użytkownika">
+                                            Edytuj
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz dezaktywować to konto?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-action btn-action-delete" title="Dezaktywuj">Usuń</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-users-state">
+                <div class="empty-state-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm.5 8c1.5 0 2.5-1 2.5-3 0-.5-.25-2.5-1-3.5-.5-.5-1-1-2.5-1S8.5 8.5 8 9c-.75 1-1 3-1 3.5 0 2 1 3 2.5 3z"/>
+                    </svg>
+                </div>
+                <h5>Brak użytkowników</h5>
+                <p>Nie znaleziono żadnych użytkowników w systemie</p>
+                <a asp-action="Create" class="btn btn-add-user-empty">+ Dodaj Pierwszego Użytkownika</a>
+            </div>
+        }
+    </div>
+</div>

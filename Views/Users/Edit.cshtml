@@ -1,0 +1,84 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.UserEditViewModel
+@using SystemZglaszaniaUsterek.Models.Enums
+@{
+    ViewData["Title"] = "Edycja użytkownika";
+}
+
+<div class="form-page-container">
+    <div class="container">
+
+        <div class="form-page-header">
+            <h1 class="form-page-title">Edycja użytkownika</h1>
+            <p class="form-page-subtitle">Zaktualizuj dane konta i uprawnienia</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="form-card">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="form-section mb-4 pb-4">
+                            <span class="form-section-title">Dane użytkownika</span>
+
+                            <div class="form-group mb-3 mt-3">
+                                <label asp-for="Username" class="form-label"></label>
+                                <input asp-for="Username" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" />
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label asp-for="Role" class="form-label"></label>
+                                <select asp-for="Role" asp-items="Html.GetEnumSelectList<Role>()" class="form-select"></select>
+                                <span asp-validation-for="Role" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                            <span class="form-section-title">Reset hasła</span>
+                            <p class="form-section-description mt-2">Wypełnij poniższe pola, aby zresetować hasło użytkownika.</p>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="NewPassword" class="form-label"></label>
+                                <input asp-for="NewPassword" class="form-control" />
+                                <span asp-validation-for="NewPassword" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="ConfirmNewPassword" class="form-label"></label>
+                                <input asp-for="ConfirmNewPassword" class="form-control" />
+                                <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit-ticket">Zapisz zmiany</button>
+                            <a asp-action="Index" class="btn-cancel-ticket">Anuluj</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

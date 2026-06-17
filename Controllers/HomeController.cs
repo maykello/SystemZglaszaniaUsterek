@@ -1,14 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using SystemZglaszaniaUsterek.Models;
+using SystemZglaszaniaUsterek.Services;
 
 namespace SystemZglaszaniaUsterek.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IStatsService _statsService;
+
+        public HomeController(IStatsService statsService)
         {
-            return View();
+            _statsService = statsService;
+        }
+
+        public async Task<IActionResult> Index(CancellationToken ct)
+        {
+            var vm = await _statsService.GetHomeStatsAsync(ct);
+            return View(vm);
         }
 
         public IActionResult Privacy()

@@ -22,6 +22,86 @@ namespace SystemZglaszaniaUsterek.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AnnouncementModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.ToTable("Announcements", (string)null);
+                });
+
+            modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AttachmentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("Attachments", (string)null);
+                });
+
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CategoryModel", b =>
                 {
                     b.Property<int>("Id")
@@ -36,7 +116,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CommentModel", b =>
@@ -66,7 +146,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.PriorityModel", b =>
@@ -83,7 +163,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Priorities");
+                    b.ToTable("Priorities", (string)null);
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.StatusModel", b =>
@@ -94,13 +174,16 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses");
+                    b.ToTable("Statuses", (string)null);
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.TicketHistoryModel", b =>
@@ -136,7 +219,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("TicketHistories");
+                    b.ToTable("TicketHistories", (string)null);
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.TicketModel", b =>
@@ -147,7 +230,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -191,7 +274,7 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasIndex("TechnicianId");
 
-                    b.ToTable("Tickets");
+                    b.ToTable("Tickets", (string)null);
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.UserModel", b =>
@@ -205,11 +288,17 @@ namespace SystemZglaszaniaUsterek.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -227,7 +316,28 @@ namespace SystemZglaszaniaUsterek.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AnnouncementModel", b =>
+                {
+                    b.HasOne("SystemZglaszaniaUsterek.Models.Entities.UserModel", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.AttachmentModel", b =>
+                {
+                    b.HasOne("SystemZglaszaniaUsterek.Models.Entities.TicketModel", "Ticket")
+                        .WithMany("Attachments")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.CommentModel", b =>
@@ -283,7 +393,8 @@ namespace SystemZglaszaniaUsterek.Migrations
                     b.HasOne("SystemZglaszaniaUsterek.Models.Entities.CategoryModel", "Category")
                         .WithMany("Tickets")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("SystemZglaszaniaUsterek.Models.Entities.PriorityModel", "Priority")
                         .WithMany("Tickets")
@@ -333,6 +444,8 @@ namespace SystemZglaszaniaUsterek.Migrations
 
             modelBuilder.Entity("SystemZglaszaniaUsterek.Models.Entities.TicketModel", b =>
                 {
+                    b.Navigation("Attachments");
+
                     b.Navigation("Comments");
 
                     b.Navigation("History");

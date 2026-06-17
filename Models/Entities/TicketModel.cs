@@ -18,9 +18,12 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         public PriorityModel? Priority { get; set; }
         
         public StatusModel? Status { get; set; }
-        
-        public CategoryModel? Category { get; set; }
-        
+
+        [Required]
+        public CategoryModel Category { get; set; } = null!;
+
+        public int CategoryId { get; set; }
+
         public UserModel? Reporter { get; set; }
         
         public UserModel? Technician { get; set; }
@@ -30,5 +33,6 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         
         public ICollection<CommentModel> Comments { get; set; } = new List<CommentModel>();
         public ICollection<TicketHistoryModel> History { get; set; } = new List<TicketHistoryModel>();
+        public ICollection<AttachmentModel> Attachments { get; set; } = new List<AttachmentModel>();
     }
 }

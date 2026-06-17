@@ -1,0 +1,86 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.ProfileEditViewModel
+@{
+    ViewData["Title"] = "Mój profil";
+}
+
+<div class="form-page-container">
+    <div class="container">
+
+        <div class="form-page-header">
+            <h1 class="form-page-title">Mój profil</h1>
+            <p class="form-page-subtitle">Zarządzaj swoimi danymi i hasłem</p>
+        </div>
+
+        @if (TempData["UserActionMessage"] is string okMsg)
+        {
+            <div class="alert alert-success">@okMsg</div>
+        }
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="form-card">
+                    <form asp-action="Profile" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-section mb-4 pb-4">
+                            <span class="form-section-title">Dane konta</span>
+
+                            <div class="form-group mb-3 mt-3">
+                                <label asp-for="Username" class="form-label"></label>
+                                <input asp-for="Username" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" />
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                            <span class="form-section-title">Zmiana hasła</span>
+                            <p class="form-section-description mt-2">Wypełnij poniższe pola, aby zmienić hasło.</p>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="CurrentPassword" class="form-label"></label>
+                                <input asp-for="CurrentPassword" class="form-control" />
+                                <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="NewPassword" class="form-label"></label>
+                                <input asp-for="NewPassword" class="form-control" />
+                                <span asp-validation-for="NewPassword" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="ConfirmNewPassword" class="form-label"></label>
+                                <input asp-for="ConfirmNewPassword" class="form-control" />
+                                <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit-ticket">Zapisz zmiany</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

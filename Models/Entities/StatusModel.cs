@@ -9,7 +9,9 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         
         [Required]
         public required string Name { get; set; }
-        
+
+        public bool IsClosed { get; set; }
+
         public ICollection<TicketModel> Tickets { get; set; } = new List<TicketModel>();
     }
 }

@@ -1,0 +1,221 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.ReportsRepairViewModel
+@{
+    ViewData["Title"] = "Raporty napraw";
+
+    string BuildQuery(int page)
+    {
+        return $"?DateFrom={Model.Filter.DateFrom?.ToString("yyyy-MM-dd")}&DateTo={Model.Filter.DateTo?.ToString("yyyy-MM-dd")}" +
+               $"&TechnicianId={Model.Filter.TechnicianId}&CategoryId={Model.Filter.CategoryId}&Page={page}&PageSize={Model.PageSize}";
+    }
+}
+
+<div class="reports-container">
+    <div class="container-fluid">
+
+        <div class="reports-page-header">
+            <h1 class="reports-page-title">Raport napraw</h1>
+        </div>
+
+        <div class="report-filter-card">
+            <form method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label">Od</label>
+                        <input type="date" name="DateFrom" value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd"))" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Do</label>
+                        <input type="date" name="DateTo" value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd"))" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Technik</label>
+                        <select name="TechnicianId" class="form-select">
+                            <option value="">-- dowolny --</option>
+                            @foreach (var t in Model.Technicians)
+                            {
+                                <option value="@t.Id" selected="@(Model.Filter.TechnicianId == t.Id)">@t.Username</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kategoria</label>
+                        <select name="CategoryId" class="form-select">
+                            <option value="">-- dowolna --</option>
+                            @foreach (var c in Model.Categories)
+                            {
+                                <option value="@c.Id" selected="@(Model.Filter.CategoryId == c.Id)">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-login w-100">Generuj</button>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a class="btn-action btn-action-role" asp-action="ExportCsv"
+                       asp-route-DateFrom="@Model.Filter.DateFrom?.ToString("yyyy-MM-dd")"
+                       asp-route-DateTo="@Model.Filter.DateTo?.ToString("yyyy-MM-dd")"
+                       asp-route-TechnicianId="@Model.Filter.TechnicianId"
+                       asp-route-CategoryId="@Model.Filter.CategoryId">
+                        ⬇ Pobierz CSV
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="report-stat-card">
+                    <div class="report-stat-label">Wszystkie</div>
+                    <div class="report-stat-value">@Model.Total</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="report-stat-card">
+                    <div class="report-stat-label">Otwarte</div>
+                    <div class="report-stat-value">@Model.Open</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="report-stat-card">
+                    <div class="report-stat-label">Zamknięte</div>
+                    <div class="report-stat-value">@Model.Closed</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="report-stat-card">
+                    <div class="report-stat-label">Śr. czas rozwiązania (h)</div>
+                    <div class="report-stat-value">@Model.AvgResolutionHours</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="report-section-card">
+                    <div class="report-section-title">Wg statusu</div>
+                    <table class="report-section-table" data-sortable="true">
+                        <thead><tr><th>Status</th><th class="text-end">Liczba</th></tr></thead>
+                        <tbody>
+                            @foreach (var r in Model.ByStatus)
+                            {
+                                <tr><td>@r.Label</td><td class="text-end fw-bold">@r.Count</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-section-card">
+                    <div class="report-section-title">Wg priorytetu</div>
+                    <table class="report-section-table" data-sortable="true">
+                        <thead><tr><th>Priorytet</th><th class="text-end">Liczba</th></tr></thead>
+                        <tbody>
+                            @foreach (var r in Model.ByPriority)
+                            {
+                                <tr><td>@r.Label</td><td class="text-end fw-bold">@r.Count</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-section-card">
+                    <div class="report-section-title">Wg kategorii</div>
+                    <table class="report-section-table" data-sortable="true">
+                        <thead><tr><th>Kategoria</th><th class="text-end">Liczba</th></tr></thead>
+                        <tbody>
+                            @foreach (var r in Model.ByCategory)
+                            {
+                                <tr><td>@r.Label</td><td class="text-end fw-bold">@r.Count</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-section-card">
+                    <div class="report-section-title">Wg technika</div>
+                    <table class="report-section-table" data-sortable="true">
+                        <thead><tr><th>Technik</th><th class="text-end">Liczba</th></tr></thead>
+                        <tbody>
+                            @foreach (var r in Model.ByTechnician)
+                            {
+                                <tr><td>@r.Label</td><td class="text-end fw-bold">@r.Count</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tickets-table-wrapper">
+            <div style="padding: 20px 24px 0;">
+                <span class="report-list-header">Lista zgłoszeń</span>
+            </div>
+            <div class="table-responsive">
+                <table class="tickets-table" data-sortable="true">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tytuł</th>
+                            <th>Status</th>
+                            <th>Priorytet</th>
+                            <th>Kategoria</th>
+                            <th>Technik</th>
+                            <th>Utworzono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model.Items)
+                        {
+                            <tr>
+                                <td data-label="#"><span class="ticket-id-cell"><a asp-controller="Tickets" asp-action="Details" asp-route-id="@t.Id" class="user-email">@t.Id</a></span></td>
+                                <td data-label="Tytuł"><span class="ticket-title-cell">@t.Title</span></td>
+                                <td data-label="Status">@t.StatusName</td>
+                                <td data-label="Priorytet">@(t.PriorityName ?? "-")</td>
+                                <td data-label="Kategoria">@t.CategoryName</td>
+                                <td data-label="Technik">@(t.TechnicianUsername ?? "-")</td>
+                                <td data-label="Utworzono">@t.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                        @if (Model.Items.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-users-state">
+                                        <p>Brak zgłoszeń pasujących do filtrów.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="tickets-footer">
+                    <nav>
+                        <ul class="pagination-custom">
+                            @foreach (var p in PaginationHelper.GetPageItems(Model.Page, Model.TotalPages))
+                            {
+                                if (p is null)
+                                {
+                                    <li class="page-item page-ellipsis"><span class="page-link">&hellip;</span></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                                        <a class="page-link" href="@BuildQuery(p.Value)">@p</a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>

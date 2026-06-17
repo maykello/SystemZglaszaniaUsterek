@@ -1,0 +1,249 @@
+@model SystemZglaszaniaUsterek.Models.ViewModels.TicketDetailsViewModel
+@using SystemZglaszaniaUsterek.Models.Enums
+@{
+    ViewData["Title"] = $"Zgłoszenie #{Model.Id}";
+}
+
+<div class="ticket-details-container">
+    <div class="container">
+        <div class="ticket-details-inner">
+
+            <a asp-action="Index" class="back-link">&larr; Powrót do listy</a>
+
+            @if (TempData["TicketActionMessage"] is string okMsg)
+            {
+                <div class="alert alert-success">@okMsg</div>
+            }
+            @if (TempData["TicketActionError"] is string errMsg)
+            {
+                <div class="alert alert-danger">@errMsg</div>
+            }
+
+            <div class="ticket-main-card">
+                <div class="ticket-main-card-header">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <h2>#@Model.Id – @Model.Title</h2>
+                            <p class="ticket-reporter">
+                                Zgłoszone przez <strong>@(Model.ReporterUsername ?? "-")</strong>
+                                &nbsp;·&nbsp; @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </p>
+                        </div>
+                        <span class="ticket-status-pill @(Model.IsClosed ? "ticket-status-closed" : "ticket-status-open")">
+                            @Model.StatusName
+                        </span>
+                    </div>
+                </div>
+                <div class="ticket-main-card-body">
+                    <div class="ticket-meta-grid">
+                        <div class="ticket-meta-item">
+                            <div class="ticket-meta-label">Kategoria</div>
+                            <div class="ticket-meta-value">@Model.CategoryName</div>
+                        </div>
+                        <div class="ticket-meta-item">
+                            <div class="ticket-meta-label">Priorytet</div>
+                            <div class="ticket-meta-value">@(Model.PriorityName ?? "-")</div>
+                        </div>
+                        <div class="ticket-meta-item">
+                            <div class="ticket-meta-label">Lokalizacja</div>
+                            <div class="ticket-meta-value">@(Model.Location ?? "-")</div>
+                        </div>
+                        <div class="ticket-meta-item">
+                            <div class="ticket-meta-label">Technik</div>
+                            <div class="ticket-meta-value">@(Model.TechnicianUsername ?? "(nieprzydzielony)")</div>
+                        </div>
+                        <div class="ticket-meta-item">
+                            <div class="ticket-meta-label">Ostatnia zmiana</div>
+                            <div class="ticket-meta-value">@(Model.UpdatedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? "-")</div>
+                        </div>
+                    </div>
+
+                    <h5 class="form-section-title">Opis</h5>
+                    <div class="ticket-description-box">@Model.Description</div>
+
+                    @if (Model.Attachments.Count > 0)
+                    {
+                        <h5 class="form-section-title mt-4">Załączniki</h5>
+                        <ul class="ticket-attachments">
+                            @foreach (var a in Model.Attachments)
+                            {
+                                <li>
+                                    <span>📎</span>
+                                    <a href="@a.Url" target="_blank" rel="noopener">@a.OriginalFileName</a>
+                                    <span class="ms-auto user-date">@a.ContentType &nbsp;·&nbsp; @((a.SizeBytes / 1024.0 / 1024.0).ToString("F2")) MB</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+            @if (Model.CanChangeStatus || Model.CanAssignTechnician || Model.CanSelfAssign)
+            {
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <h4>Akcje</h4>
+                    </div>
+                    <div class="section-card-body">
+
+                        @if (Model.CanChangeStatus)
+                        {
+                            <form asp-action="ChangeStatus" asp-route-id="@Model.Id" method="post" class="row g-2 align-items-end mb-3">
+                                @Html.AntiForgeryToken()
+                                <div class="col-auto">
+                                    <label class="form-label">Zmień status</label>
+                                    <select name="statusId" class="form-select">
+                                        @foreach (var s in Model.AvailableStatuses)
+                                        {
+                                            <option value="@s.Id" selected="@(Model.StatusId == s.Id)">@s.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-login">Zapisz status</button>
+                                </div>
+                            </form>
+
+                            <form asp-action="ChangePriority" asp-route-id="@Model.Id" method="post" class="row g-2 align-items-end mb-3">
+                                @Html.AntiForgeryToken()
+                                <div class="col-auto">
+                                    <label class="form-label">Zmień priorytet</label>
+                                    <select name="priorityId" class="form-select">
+                                        @foreach (var p in Model.AvailablePriorities)
+                                        {
+                                            <option value="@p.Id" selected="@(Model.PriorityId == p.Id)">@p.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-login">Zapisz priorytet</button>
+                                </div>
+                            </form>
+                        }
+
+                        @if (Model.CanAssignTechnician)
+                        {
+                            <form asp-action="Assign" asp-route-id="@Model.Id" method="post" class="row g-2 align-items-end">
+                                @Html.AntiForgeryToken()
+                                <div class="col-auto">
+                                    <label class="form-label">Przydziel technika</label>
+                                    <select name="technicianId" class="form-select">
+                                        <option value="">(brak)</option>
+                                        @foreach (var u in Model.AvailableTechnicians)
+                                        {
+                                            <option value="@u.Id" selected="@(Model.TechnicianId == u.Id)">@u.Username (@u.Role.ToDisplayName())</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-login">Przydziel</button>
+                                </div>
+                            </form>
+                        }
+                        else if (Model.CanSelfAssign)
+                        {
+                            @if (Model.TechnicianId == null)
+                            {
+                                <form asp-action="Assign" asp-route-id="@Model.Id" method="post" class="d-inline-block">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="technicianId" value="@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)" />
+                                    <button type="submit" class="btn-action btn-action-role">Przydziel mnie do tego zgłoszenia</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Assign" asp-route-id="@Model.Id" method="post" class="d-inline-block"
+                                      onsubmit="return confirm('Zwolnić zgłoszenie? Inny technik będzie mógł je podjąć.');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-action btn-action-edit">Zwolnij zgłoszenie</button>
+                                </form>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="section-card">
+                <div class="section-card-header">
+                    <h4>Komentarze</h4>
+                </div>
+                <div class="section-card-body">
+
+                    @if (Model.Comments.Count == 0)
+                    {
+                        <p class="tickets-count">Brak komentarzy.</p>
+                    }
+                    else
+                    {
+                        @foreach (var c in Model.Comments)
+                        {
+                            <div class="comment-item">
+                                <div class="comment-meta">
+                                    <strong>@(c.AuthorUsername ?? "-")</strong>
+                                    &nbsp;·&nbsp; @c.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                </div>
+                                <div class="comment-content">@c.Content</div>
+                            </div>
+                        }
+                    }
+
+                    @if (Model.CanComment)
+                    {
+                        <form asp-action="AddComment" method="post" class="mt-4">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="TicketId" value="@Model.Id" />
+                            <div class="form-group mb-3">
+                                <label for="commentContent" class="form-label">Dodaj komentarz</label>
+                                <textarea id="commentContent" name="Content" class="form-control" rows="3" maxlength="2000" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-login">Wyślij</button>
+                        </form>
+                    }
+                    else if (Model.IsClosed)
+                    {
+                        <div class="alert alert-secondary mt-3 mb-0">Zgłoszenie jest zamknięte. Dodawanie komentarzy jest zablokowane.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-card-header">
+                    <h4>Historia zmian statusu</h4>
+                </div>
+                <div>
+                    @if (Model.History.Count == 0)
+                    {
+                        <div class="section-card-body">
+                            <p class="tickets-count mb-0">Brak wpisów.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="history-table" data-sortable="true">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Z</th>
+                                    <th>Na</th>
+                                    <th>Przez</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var h in Model.History)
+                                {
+                                    <tr>
+                                        <td>@h.ChangedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td>@(h.OldStatusName ?? "-")</td>
+                                        <td>@(h.NewStatusName ?? "-")</td>
+                                        <td>@(h.ChangedByUsername ?? "-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

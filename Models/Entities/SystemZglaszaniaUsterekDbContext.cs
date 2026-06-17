@@ -17,6 +17,8 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         public DbSet<StatusModel> Statuses { get; set; }
         public DbSet<PriorityModel> Priorities { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
+        public DbSet<AttachmentModel> Attachments { get; set; }
+        public DbSet<AnnouncementModel> Announcements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,9 +34,26 @@ namespace SystemZglaszaniaUsterek.Models.Entities
                 .WithMany(u => u.AssignedTickets)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TicketModel>()
+                .HasOne(t => t.Category)
+                .WithMany(c => c.Tickets)
+                .HasForeignKey(t => t.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AttachmentModel>()
+                .HasOne(a => a.Ticket)
+                .WithMany(t => t.Attachments)
+                .HasForeignKey(a => a.TicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
                 .SelectMany(e => e.GetForeignKeys()))
             {
+                if (foreignKey.DeleteBehavior == DeleteBehavior.Cascade)
+                {
+                    continue;
+                }
+
                 if (foreignKey.DeleteBehavior != DeleteBehavior.Restrict)
                 {
                     foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
