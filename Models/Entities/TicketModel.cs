@@ -30,6 +30,8 @@ namespace SystemZglaszaniaUsterek.Models.Entities
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+
+        public DateTime? ResolvedAt { get; set; }
         
         public ICollection<CommentModel> Comments { get; set; } = new List<CommentModel>();
         public ICollection<TicketHistoryModel> History { get; set; } = new List<TicketHistoryModel>();

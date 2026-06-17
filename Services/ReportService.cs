@@ -34,13 +34,13 @@ namespace SystemZglaszaniaUsterek.Services
                 var closed = await query.CountAsync(t => t.Status != null && t.Status.IsClosed, ct);
 
                 var resolved = await query
-                    .Where(t => t.Status != null && t.Status.IsClosed && t.UpdatedAt != null)
-                    .Select(t => new { t.CreatedAt, t.UpdatedAt })
+                    .Where(t => t.Status != null && t.Status.IsClosed && t.ResolvedAt != null)
+                    .Select(t => new { t.CreatedAt, t.ResolvedAt })
                     .ToListAsync(ct);
 
                 var avgHours = resolved.Count == 0
                     ? 0
-                    : resolved.Select(x => Math.Max(0, ((x.UpdatedAt!.Value) - x.CreatedAt).TotalHours)).Average();
+                    : resolved.Select(x => Math.Max(0, ((x.ResolvedAt!.Value) - x.CreatedAt).TotalHours)).Average();
 
                 var byStatus = await query
                     .Where(t => t.Status != null)
@@ -152,7 +152,6 @@ namespace SystemZglaszaniaUsterek.Services
                       .AppendLine();
                 }
 
-                // UTF-8 BOM so Excel reads diacritics
                 var bom = new byte[] { 0xEF, 0xBB, 0xBF };
                 var content = Encoding.UTF8.GetBytes(sb.ToString());
                 var output = new byte[bom.Length + content.Length];
