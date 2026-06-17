@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -67,14 +68,7 @@ namespace SystemZglaszaniaUsterek.Controllers
                 return NotFound();
             }
 
-            var model = new AnnouncementFormViewModel
-            {
-                Id = entity.Id,
-                Title = entity.Title,
-                Content = entity.Content,
-                Severity = entity.Severity,
-                IsActive = entity.IsActive
-            };
+            var model = entity.Adapt<AnnouncementFormViewModel>();
             return View(model);
         }
 

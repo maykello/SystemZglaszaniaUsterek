@@ -406,6 +406,16 @@ namespace SystemZglaszaniaUsterek.Services
             ticket.Status = newStatus;
             ticket.UpdatedAt = DateTime.UtcNow;
 
+            if (newStatus.IsClosed)
+            {
+                if (ticket.ResolvedAt == null)
+                    ticket.ResolvedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                ticket.ResolvedAt = null;
+            }
+
             var actor = await _db.Users.FirstOrDefaultAsync(u => u.Id == actorUserId, ct);
             _db.TicketHistories.Add(new TicketHistoryModel
             {

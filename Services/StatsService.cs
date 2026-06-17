@@ -32,18 +32,19 @@ namespace SystemZglaszaniaUsterek.Services
                     {
                         IsClosed = t.Status != null && t.Status.IsClosed,
                         t.CreatedAt,
-                        t.UpdatedAt
+                        t.UpdatedAt,
+                        t.ResolvedAt
                     })
                     .ToListAsync(ct);
 
                 var currentIssues = rows.Count(r => !r.IsClosed);
                 var closed = rows.Where(r => r.IsClosed).ToList();
                 var totalResolved = closed.Count;
-                var weekResolved = closed.Count(r => r.UpdatedAt != null && r.UpdatedAt >= weekAgo);
+                var weekResolved = closed.Count(r => r.ResolvedAt != null && r.ResolvedAt >= weekAgo);
 
                 var spans = closed
-                    .Where(r => r.UpdatedAt != null)
-                    .Select(r => Math.Max(0, (r.UpdatedAt!.Value - r.CreatedAt).TotalHours))
+                    .Where(r => r.ResolvedAt != null)
+                    .Select(r => Math.Max(0, (r.ResolvedAt!.Value - r.CreatedAt).TotalHours))
                     .ToList();
 
                 var avgHours = spans.Count == 0 ? 0 : spans.Average();
